@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>학습클리닉 2학기 일정표</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+  <style>
+    :root{color-scheme:light dark}
+    html,body{margin:0}
+    img{max-width:100%}
+    [hidden]{display:none!important}
+  </style>
+</head>
+<body>
+<style>
+:root{
+  --ground:#F4F7F5; --surface:#FFFFFF; --surface-2:#EDF3F1; --line:#DBE6E2;
+  --ink:#26332F; --ink-2:#5C6E68; --ink-3:#8A9A95;
+  --brand:#1F6F66; --brand-2:#2E8C81; --brand-soft:#DCEFEA;
+  --accent:#C0741A; --accent-soft:#FAEDD8;
+  --rest:#B54C40; --rest-soft:#F7E2DE;
+  --est:#6B5EA0; --est-soft:#E9E4F4;
+  --shadow:0 1px 2px rgba(31,111,102,.06), 0 8px 24px rgba(31,111,102,.07);
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#121917; --surface:#1A2321; --surface-2:#212C29; --line:#2F3C39;
+    --ink:#E7EFEC; --ink-2:#9EAFAA; --ink-3:#788884;
+    --brand:#63C6B8; --brand-2:#82D8CA; --brand-soft:#1E3A36;
+    --accent:#E5A64E; --accent-soft:#382C18;
+    --rest:#E08878; --rest-soft:#3A2422;
+    --est:#AC9FDC; --est-soft:#292441;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.28);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#121917; --surface:#1A2321; --surface-2:#212C29; --line:#2F3C39;
+  --ink:#E7EFEC; --ink-2:#9EAFAA; --ink-3:#788884;
+  --brand:#63C6B8; --brand-2:#82D8CA; --brand-soft:#1E3A36;
+  --accent:#E5A64E; --accent-soft:#382C18;
+  --rest:#E08878; --rest-soft:#3A2422;
+  --est:#AC9FDC; --est-soft:#292441;
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.28);
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--ground); color:var(--ink);
+  font-family:"Noto Sans KR", -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif;
+  font-size:15px; line-height:1.65; margin:0;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1060px; margin:0 auto; padding:28px 20px 72px;}
+h1,h2,h3{font-family:"Jua","Noto Sans KR",sans-serif; font-weight:400; text-wrap:balance; margin:0;}
+.mono-num{font-variant-numeric:tabular-nums}
+
+/* ── header ─────────────────────────────── */
+.hero{
+  background:var(--surface); border:1px solid var(--line); border-radius:20px;
+  box-shadow:var(--shadow); padding:26px 28px; display:flex; gap:22px;
+  align-items:center; flex-wrap:wrap;
+}
+.hero-text{flex:1 1 320px; min-width:0}
+.eyebrow{
+  font-size:12px; letter-spacing:.14em; color:var(--brand); font-weight:700;
+  text-transform:none; margin-bottom:8px;
+}
+.hero h1{font-size:clamp(27px,4.4vw,38px); line-height:1.25; letter-spacing:-.01em}
+.hero p{color:var(--ink-2); margin:10px 0 0; font-size:14.5px}
+.mascot{flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:8px}
+.bubble{
+  background:var(--brand-soft); color:var(--brand); font-family:"Jua",sans-serif;
+  font-size:13.5px; padding:7px 14px; border-radius:14px 14px 14px 4px; white-space:nowrap;
+}
+
+/* ── dday strip ─────────────────────────── */
+.ddays{display:grid; grid-template-columns:repeat(auto-fit,minmax(168px,1fr)); gap:12px; margin:16px 0 30px}
+.dday{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:14px 16px}
+.dday .lab{font-size:12.5px; color:var(--ink-2)}
+.dday .val{font-family:"Jua",sans-serif; font-size:23px; color:var(--brand); line-height:1.3; margin-top:2px}
+.dday .sub{font-size:12px; color:var(--ink-3); font-variant-numeric:tabular-nums}
+.dday.hot .val{color:var(--accent)}
+
+/* ── section ────────────────────────────── */
+section{margin-bottom:34px}
+.sec-head{display:flex; align-items:baseline; gap:10px; margin-bottom:13px; flex-wrap:wrap}
+.sec-head h2{font-size:20px}
+.sec-head .note{font-size:12.5px; color:var(--ink-3)}
+
+/* ── month nav ──────────────────────────── */
+.mnav{display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap}
+.mnav a{
+  font-family:"Jua",sans-serif; font-size:14px; text-decoration:none;
+  color:var(--brand); background:var(--surface); border:1px solid var(--line);
+  padding:6px 15px; border-radius:999px;
+}
+.mnav a:hover{background:var(--brand-soft)}
+.mnav a:focus-visible{outline:2px solid var(--brand); outline-offset:2px}
+
+/* ── calendar ───────────────────────────── */
+.cal-shell{overflow-x:auto; border:1px solid var(--line); border-radius:var(--r); background:var(--surface); box-shadow:var(--shadow)}
+.cal{min-width:660px; width:100%}
+.cal-top{
+  display:flex; align-items:baseline; gap:12px; padding:15px 18px 11px; border-bottom:1px solid var(--line);
+  flex-wrap:wrap;
+}
+.cal-top h3{font-size:19px}
+.cal-top .cnt{font-size:12.5px; color:var(--ink-3)}
+.cal-grid{display:grid; grid-template-columns:repeat(7,1fr)}
+.dow{
+  padding:8px 0; text-align:center; font-size:12px; font-weight:500; color:var(--ink-2);
+  background:var(--surface-2); border-bottom:1px solid var(--line);
+}
+.dow.sun{color:var(--rest)}
+.cell{
+  min-height:98px; padding:7px 8px 9px; border-right:1px solid var(--line); border-bottom:1px solid var(--line);
+  display:flex; flex-direction:column; gap:4px;
+}
+.cell:nth-child(7n){border-right:none}
+.cell.out{background:var(--surface-2); opacity:.5}
+.cell.lesson{background:linear-gradient(0deg,var(--brand-soft),var(--brand-soft)); background-size:100% 3px; background-repeat:no-repeat; background-position:bottom}
+.cell.off{background:var(--rest-soft)}
+.dnum{font-size:13px; font-weight:500; color:var(--ink-2); display:flex; align-items:center; gap:5px; font-variant-numeric:tabular-nums}
+.cell.sun .dnum{color:var(--rest)}
+.cell.today .dnum{
+  background:var(--brand); color:#fff; border-radius:8px; padding:0 7px; align-self:flex-start;
+}
+.dot{width:6px; height:6px; border-radius:50%; background:var(--brand-2); flex:0 0 auto}
+.chip{
+  font-size:11.5px; line-height:1.4; padding:3px 7px; border-radius:7px;
+  background:var(--surface-2); color:var(--ink); border-left:3px solid var(--ink-3);
+  word-break:keep-all;
+}
+.chip.key{background:var(--brand-soft); border-left-color:var(--brand); color:var(--brand); font-weight:700}
+.chip.doc{background:var(--surface-2); border-left-color:var(--brand-2); color:var(--ink)}
+.chip.off{background:transparent; border-left-color:var(--rest); color:var(--rest); font-weight:500}
+
+/* ── legend ─────────────────────────────── */
+.legend{display:flex; gap:8px 18px; flex-wrap:wrap; margin-top:12px; font-size:12.5px; color:var(--ink-2)}
+.legend span{display:inline-flex; align-items:center; gap:6px}
+.sw{width:12px; height:12px; border-radius:4px; flex:0 0 auto}
+
+/* ── guide panel ────────────────────────── */
+.panel{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:18px 20px}
+.panel h3{font-size:16.5px; margin-bottom:4px}
+.panel .cap{font-size:12.5px; color:var(--ink-3); margin-bottom:12px}
+.rlist{list-style:none; margin:0; padding:0; display:grid; gap:9px}
+.rlist li{display:grid; grid-template-columns:auto 1fr; gap:11px; font-size:13.5px; align-items:baseline}
+.when{
+  font-family:"Jua",sans-serif; font-size:12px; color:var(--brand); background:var(--brand-soft);
+  padding:2px 9px; border-radius:999px; white-space:nowrap;
+}
+
+/* ── footer ─────────────────────────────── */
+footer{
+  margin-top:38px; padding-top:20px; border-top:1px solid var(--line);
+  font-size:12.5px; color:var(--ink-3); display:grid; gap:6px;
+}
+footer b{color:var(--ink-2); font-weight:500}
+
+@media (max-width:560px){
+  .wrap{padding:18px 13px 56px}
+  .hero{padding:20px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+</style>
+
+<div class="wrap">
+
+  <header class="hero">
+    <div class="hero-text">
+      <div class="eyebrow">부산광역시서부교육지원청 · 서부기초학력지원센터</div>
+      <h1>2026학년도 2학기<br>찾아가는 학습클리닉 일정</h1>
+      <p>운영 기간 <b>2026. 9. 21.(월) ~ 11. 27.(금)</b> · 문의 051-250-0560</p>
+    </div>
+    <div class="mascot">
+      <div class="bubble">2학기도 잘 부탁드려요!</div>
+      <svg width="118" height="126" viewBox="0 0 118 126" role="img" aria-label="학습클리닉 마스코트 클리니">
+        <ellipse cx="59" cy="118" rx="30" ry="5" fill="var(--line)" opacity=".7"/>
+        <path d="M59 16c-2-7 3-12 8-13 1 6-3 11-8 13z" fill="var(--brand-2)"/>
+        <path d="M59 17c0-5-4-8-8-9 0 5 3 8 8 9z" fill="var(--brand)"/>
+        <ellipse cx="59" cy="66" rx="42" ry="46" fill="var(--brand-soft)" stroke="var(--brand)" stroke-width="2.6"/>
+        <ellipse cx="59" cy="78" rx="27" ry="24" fill="var(--surface)" opacity=".55"/>
+        <circle cx="45" cy="60" r="5.6" fill="var(--brand)"/>
+        <circle cx="73" cy="60" r="5.6" fill="var(--brand)"/>
+        <circle cx="46.8" cy="58" r="1.9" fill="var(--surface)"/>
+        <circle cx="74.8" cy="58" r="1.9" fill="var(--surface)"/>
+        <ellipse cx="34" cy="72" rx="6" ry="4" fill="var(--rest)" opacity=".38"/>
+        <ellipse cx="84" cy="72" rx="6" ry="4" fill="var(--rest)" opacity=".38"/>
+        <path d="M52 73q7 7 14 0" stroke="var(--brand)" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+        <g transform="rotate(24 96 74)">
+          <rect x="92" y="46" width="9" height="38" rx="2.5" fill="var(--accent)"/>
+          <rect x="92" y="46" width="9" height="7" rx="2.5" fill="var(--brand)"/>
+          <path d="M92 84h9l-4.5 9z" fill="var(--ink-2)"/>
+        </g>
+        <path d="M96 62q10 2 12 10" stroke="var(--brand)" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+        <path d="M22 66q-9 4-9 13" stroke="var(--brand)" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+      </svg>
+    </div>
+  </header>
+
+  <div class="ddays" id="ddays"></div>
+
+  <section>
+    <div class="sec-head">
+      <h2>3개월 달력</h2>
+      <span class="note">2026년 9월 – 11월 · 수업일은 요일별 표준 수업일(공휴일 제외) 기준</span>
+    </div>
+    <nav class="mnav">
+      <a href="#m9">9월</a><a href="#m10">10월</a><a href="#m11">11월</a>
+    </nav>
+    <div id="cals" style="display:grid; gap:20px"></div>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--brand)"></i>주요 일정</span>
+      <span><i class="sw" style="background:var(--brand-2)"></i>안내·교재</span>
+      <span><i class="sw" style="background:var(--rest)"></i>공휴일(수업 없음)</span>
+      <span><i class="dot"></i>수업일</span>
+    </div>
+  </section>
+
+  <section>
+    <div class="panel">
+      <h3>확인해 주세요</h3>
+      <p class="cap">학생별 수업 요일·시간은 소속 학교의 안내에 따라 진행됩니다.</p>
+      <ul class="rlist">
+        <li><span class="when">9/21(월)</span><span>2학기 수업 시작</span></li>
+        <li><span class="when">9/24~25</span><span>추석 연휴 · 수업 없음</span></li>
+        <li><span class="when">10/9(금)</span><span>한글날 · 수업 없음</span></li>
+        <li><span class="when">11/27(금)</span><span>2학기 수업 종료</span></li>
+        <li><span class="when">문의</span><span>부산광역시서부교육지원청 서부기초학력지원센터 051-250-0560</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <div>부산광역시서부교육지원청 서부기초학력지원센터 · 2026학년도 2학기 찾아가는 학습클리닉</div>
+    <div>문의 051-250-0560</div>
+  </footer>
+</div>
+
+<script>
+const TODAY = new Date(2026, 8, 9);
+const D = (m, d) => `2026-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+
+/* 요일별 표준 수업일 (공휴일 제외) */
+const LESSONS = [
+  [9,21],[9,28],[10,12],[10,19],[10,26],[11,2],[11,9],[11,16],[11,23],
+  [9,22],[9,29],[10,6],[10,13],[10,20],[10,27],[11,3],[11,10],[11,17],[11,24],
+  [9,23],[9,30],[10,7],[10,14],[10,21],[10,28],[11,4],[11,11],[11,18],[11,25],
+  [10,1],[10,8],[10,15],[10,22],[10,29],[11,5],[11,12],[11,19],[11,26],
+  [10,2],[10,16],[10,23],[10,30],[11,6],[11,13],[11,20],[11,27]
+].map(([m,d]) => D(m,d));
+const LESSON_SET = new Set(LESSONS);
+
+const OFF = { [D(9,24)]:'추석 연휴', [D(9,25)]:'추석', [D(10,5)]:'개천절 대체공휴일', [D(10,9)]:'한글날' };
+
+const EVENTS = {
+  [D(9,14)]: [['doc','수업 안내 및 교재 수령 시작 (~9/18)']],
+  [D(9,18)]: [['doc','교재 수령 마감']],
+  [D(9,21)]: [['key','2학기 학습클리닉 수업 시작']],
+  [D(11,27)]:[['key','2학기 학습클리닉 수업 종료']]
+};
+
+/* ── D-day ─────────────────────────────── */
+const dd = (iso) => {
+  const [y,m,d] = iso.split('-').map(Number);
+  return Math.round((new Date(y,m-1,d) - TODAY) / 86400000);
+};
+const fmtD = n => n > 0 ? `D-${n}` : n === 0 ? 'D-DAY' : `D+${-n}`;
+document.getElementById('ddays').innerHTML = [
+  ['수업 안내 및 교재 수령', D(9,14), '9월 14일 (월)', true],
+  ['2학기 수업 시작', D(9,21), '9월 21일 (월)', true],
+  ['2학기 수업 종료', D(11,27), '11월 27일 (금)', false]
+].map(([lab,iso,sub,hot]) => {
+  const n = dd(iso);
+  return `<div class="dday${hot && n >= 0 && n <= 14 ? ' hot' : ''}">
+    <div class="lab">${lab}</div>
+    <div class="val mono-num">${fmtD(n)}</div>
+    <div class="sub">${sub}</div></div>`;
+}).join('');
+
+/* ── 달력 ───────────────────────────────── */
+const DOW = ['일','월','화','수','목','금','토'];
+const todayISO = D(TODAY.getMonth()+1, TODAY.getDate());
+
+function month(m){
+  const first = new Date(2026, m-1, 1);
+  const days  = new Date(2026, m, 0).getDate();
+  const lead  = first.getDay();
+  const cells = [];
+
+  for (let i = 0; i < lead; i++) cells.push('<div class="cell out"></div>');
+
+  for (let d = 1; d <= days; d++){
+    const iso = D(m,d), wd = new Date(2026, m-1, d).getDay();
+    const isLesson = LESSON_SET.has(iso), off = OFF[iso];
+    const cls = ['cell'];
+    if (wd === 0) cls.push('sun');
+    if (off) cls.push('off'); else if (isLesson) cls.push('lesson');
+    if (iso === todayISO) cls.push('today');
+
+    let chips = '';
+    if (off) chips += `<div class="chip off">${off} · 수업 없음</div>`;
+    (EVENTS[iso] || []).forEach(([k,t]) => { chips += `<div class="chip ${k}">${t}</div>`; });
+
+    cells.push(`<div class="${cls.join(' ')}">
+      <div class="dnum">${d}${isLesson ? '<i class="dot"></i>' : ''}</div>${chips}</div>`);
+  }
+  while (cells.length % 7) cells.push('<div class="cell out"></div>');
+
+  const n = LESSONS.filter(x => x.startsWith(`2026-${String(m).padStart(2,'0')}`)).length;
+  return `<div class="cal-shell" id="m${m}"><div class="cal">
+    <div class="cal-top"><h3>${m}월</h3>
+      <span class="cnt mono-num">수업일 ${n}일</span></div>
+    <div class="cal-grid">${DOW.map((x,i) => `<div class="dow${i===0?' sun':''}">${x}</div>`).join('')}</div>
+    <div class="cal-grid">${cells.join('')}</div>
+  </div></div>`;
+}
+document.getElementById('cals').innerHTML = [9,10,11].map(month).join('');
+</script>
+
+</body>
+</html>
