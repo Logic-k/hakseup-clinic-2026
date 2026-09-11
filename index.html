@@ -169,9 +169,28 @@ footer{
 }
 footer b{color:var(--ink-2); font-weight:500}
 
+/* ── 탭 ─────────────────────────────────── */
+.tabs{
+  display:flex; gap:6px; flex-wrap:wrap; background:var(--surface); border:1px solid var(--line);
+  border-radius:14px; padding:6px; margin:16px 0 22px; box-shadow:var(--shadow);
+}
+.tabs .tab{
+  border:0; background:transparent; font-family:"Jua","Noto Sans KR",sans-serif; font-size:15px;
+  color:var(--ink-2); padding:9px 18px; border-radius:10px; cursor:pointer;
+}
+.tabs .tab:hover{background:var(--surface-2); color:var(--ink)}
+.tabs .tab.on{background:var(--brand); color:#fff}
+.tabs .tab:focus-visible{outline:2px solid var(--brand); outline-offset:2px}
+.tabpanel[hidden]{display:none}
+.diag-frame{
+  display:block; width:100%; height:1500px; border:1px solid var(--line);
+  border-radius:var(--r); background:var(--surface); box-shadow:var(--shadow);
+}
+
 @media (max-width:560px){
   .wrap{padding:18px 13px 56px}
   .hero{padding:20px}
+  .diag-frame{height:2500px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
 </style>
@@ -189,6 +208,13 @@ footer b{color:var(--ink-2); font-weight:500}
       <img src="duck.png" alt="학습클리닉 마스코트" width="564" height="350">
     </div>
   </header>
+
+  <nav class="tabs" id="tabs" role="tablist" aria-label="페이지 구분">
+    <button class="tab on" data-tab="schedule" role="tab" aria-selected="true">2학기 일정표</button>
+    <button class="tab" data-tab="diag" role="tab" aria-selected="false">2차 진단 · 첫 멘토링 주</button>
+  </nav>
+
+  <div class="tabpanel" id="tab-schedule" role="tabpanel">
 
   <div class="ddays" id="ddays"></div>
 
@@ -223,6 +249,16 @@ footer b{color:var(--ink-2); font-weight:500}
     </div>
   </section>
 
+  </div><!-- /tab-schedule -->
+
+  <div class="tabpanel" id="tab-diag" role="tabpanel" hidden>
+    <div class="sec-head">
+      <h2>2차 진단 방법 및 첫 멘토링 주</h2>
+      <span class="note">2026학년도 2학기 · 9. 21.(월) 수업 시작 전에 확인하세요</span>
+    </div>
+    <iframe class="diag-frame" id="diagFrame" src="diag.html" title="2차 진단 방법 및 첫 멘토링 주 도식"></iframe>
+  </div>
+
   <section>
     <div class="sec-head">
       <h2>문의 · 댓글</h2>
@@ -253,7 +289,7 @@ footer b{color:var(--ink-2); font-weight:500}
 </div>
 
 <script>
-const TODAY = new Date(2026, 8, 9);
+const TODAY = new Date(); TODAY.setHours(0, 0, 0, 0);
 const D = (m, d) => `2026-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
 
 /* 요일별 표준 수업일 (공휴일 제외) */
@@ -269,6 +305,7 @@ const LESSON_SET = new Set(LESSONS);
 const OFF = { [D(9,24)]:'추석 연휴', [D(9,25)]:'추석', [D(10,5)]:'개천절 대체공휴일', [D(10,9)]:'한글날' };
 
 const EVENTS = {
+  [D(9,11)]: [['key','1차적 매칭 종료']],
   [D(9,14)]: [['doc','수업 안내 및 교재 수령 시작 (~9/18)']],
   [D(9,18)]: [['doc','교재 수령 마감']],
   [D(9,21)]: [['key','2학기 학습클리닉 수업 시작']],
@@ -331,6 +368,37 @@ function month(m){
   </div></div>`;
 }
 document.getElementById('cals').innerHTML = [9,10,11].map(month).join('');
+
+/* ── 탭 전환 ───────────────────────────── */
+const tabsEl = document.getElementById('tabs');
+const diagFrame = document.getElementById('diagFrame');
+
+function fitDiagFrame(){
+  if(!diagFrame) return;
+  try{
+    const doc = diagFrame.contentDocument;
+    if(!doc || !doc.documentElement) return;
+    const h = Math.max(doc.documentElement.scrollHeight, doc.body ? doc.body.scrollHeight : 0);
+    if(h > 300) diagFrame.style.height = (h + 20) + 'px';
+  }catch(e){}
+}
+
+tabsEl.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    tabsEl.querySelectorAll('.tab').forEach(b => {
+      const on = b === btn;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    document.querySelectorAll('.tabpanel').forEach(p => {
+      p.hidden = p.id !== 'tab-' + btn.dataset.tab;
+    });
+    if(btn.dataset.tab === 'diag') fitDiagFrame();
+  });
+});
+
+if(diagFrame) diagFrame.addEventListener('load', fitDiagFrame);
+window.addEventListener('resize', fitDiagFrame);
 </script>
 
 </body>

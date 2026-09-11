@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2차 진단 방법 및 첫 멘토링 주 · 서부기초학력지원센터</title>
+<style>
+/* ================= 문서 기본 스타일 (자유 수정 영역) ================= */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
+:root{
+  --ink:#0f172a; --sub:#64748b; --line:#e6eaf0; --accent:#2563eb;
+  --font:'Pretendard','Apple SD Gothic Neo','Malgun Gothic','맑은 고딕',-apple-system,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#e8ebf0;font-family:var(--font);color:var(--ink);-webkit-font-smoothing:antialiased;
+  padding:28px 18px;}
+.fig-stage{max-width:1240px;margin:0 auto;background:#fff;border-radius:16px;
+  box-shadow:0 14px 44px rgba(20,30,60,.14);padding:36px 40px;}
+/* 캔버스 안 도형·텍스트 스타일은 자유롭게 추가 */
+
+/* ================= 문서 팔레트 (일정표 페이지와 같은 계열) ================= */
+:root{
+  --brand:#1F6F66; --brand-2:#2E8C81; --brand-soft:#DCEFEA;
+  --accent:#C0741A; --accent-soft:#FAEDD8;
+  --info:#2A78D6; --info-soft:#E3EDF6;
+  --ink:#1E2A26; --sub:#5C6E68; --line:#E2E9E6;
+}
+body{background:#EDF1EF;}
+.fig-stage{background:#FBFCFB;}
+
+.doc-h{font-size:12.5px;font-weight:700;color:var(--brand);letter-spacing:.08em;margin-bottom:8px;}
+.doc-t{font-size:27px;font-weight:700;line-height:1.3;letter-spacing:-.01em;margin-bottom:8px;}
+.doc-s{font-size:13.5px;color:var(--sub);line-height:1.6;margin-bottom:26px;}
+.doc-foot{font-size:12px;color:var(--sub);line-height:1.7;margin-top:28px;padding-top:16px;border-top:1px solid var(--line);}
+.stage-sep{height:1px;background:var(--line);margin:36px 0 30px;}
+
+/* ================= 노드 공통 ================= */
+.nd{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;
+  box-shadow:0 1px 2px rgba(31,111,102,.05);font-size:13.5px;line-height:1.55;color:var(--ink);}
+.nd.plain{background:transparent;border:none;box-shadow:none;padding:0;}
+.nd.key{background:var(--brand-soft);border-color:#BEDFD5;}
+.nd.info{background:var(--info-soft);border-color:#C6DBEF;}
+.nd.warn{background:var(--accent-soft);border-color:#EED9B4;}
+.nd.off{background:#FBEDEA;border-color:#EFCFC8;}
+
+.nd .t{font-size:23px;font-weight:700;line-height:1.25;letter-spacing:-.01em;}
+.nd .s{font-size:13px;color:var(--sub);margin-top:6px;}
+.nd .h{font-size:16px;font-weight:700;line-height:1.35;margin-bottom:6px;}
+.nd.key .h{color:var(--brand);}
+.nd.info .h{color:var(--info);}
+.nd.warn .h{color:#8A5210;}
+.nd .cap{font-size:12px;color:var(--sub);line-height:1.5;}
+.nd .b{font-weight:700;}
+.nd .mt{margin-top:8px;}
+
+/* 단계 카드 */
+.nd.step{padding:15px 16px 14px;}
+.badge{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;
+  border-radius:50%;background:var(--brand);color:#fff;font-size:13.5px;font-weight:700;margin-bottom:9px;}
+
+/* 요일 스트립 */
+.day .dn{font-size:18px;font-weight:700;color:var(--brand);line-height:1.2;}
+.day .ds{font-size:13px;color:var(--ink);margin-top:3px;}
+.day .dd{font-size:12px;color:var(--sub);margin-top:3px;}
+.nd.off .dn{color:#B54C40;}
+
+/* 규칙 스트립 */
+.nd.rules{display:flex;flex-wrap:wrap;gap:10px 26px;align-items:center;
+  background:var(--brand-soft);border-color:#BEDFD5;}
+.nd.rules .r{font-size:13.5px;color:#1B5B53;}
+
+/* 도구 태그 */
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.chip{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;
+  background:#fff;border:1px solid var(--line);color:var(--sub);}
+.chip.n{background:var(--info-soft);border-color:#C6DBEF;color:var(--info);}
+</style>
+
+<style id="fig-static-css">/* fig-static: 배포본 최소 스타일. fig-editor.css의 규약 부분과 같게 유지한다 */
+.fig-scale{position:relative;overflow:visible}
+.fig-canvas{position:relative;transform-origin:0 0}
+.fig-node{position:absolute;box-sizing:border-box}
+.fig-node *{box-sizing:border-box}
+.fig-edge{display:none}
+.fig-edges{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none;z-index:5}
+.fig-elabel{position:absolute;z-index:6;font-size:12px;font-weight:700;padding:2px 8px;border-radius:12px;background:rgba(255,255,255,.94);box-shadow:0 1px 4px rgba(15,23,42,.14);white-space:nowrap;transform:translate(-50%,-50%);pointer-events:none}
+@keyframes figFlow{to{stroke-dashoffset:-28}}
+.fig-edges g.fig-flow .fe-main{stroke-dasharray:7 7 !important;animation:figFlow 1.05s linear infinite}
+</style></head>
+<body>
+<div class="fig-stage">
+
+  <!-- ======== FIG:CONTENT START: 이 안을 작성한다 ======== -->
+  <div class="doc-h">2026학년도 2학기 · 부산광역시서부교육지원청 서부기초학력지원센터</div>
+  <div class="doc-t">2차 진단 방법 및 첫 멘토링 주</div>
+  <div class="doc-s">2학기 수업이 9. 21.(월)에 시작됩니다. 그 전에 끝내야 하는 2차 전문진단 절차와, 첫 멘토링 주에 챙길 것을 한 장에 정리했습니다.</div>
+
+  <!-- ================= 1. 2차 전문진단 ================= -->
+  <div class="fig-canvas" data-size="1200x620" style="width: 1200px; height: 620px;"><svg class="fig-edges" viewBox="0 0 1200 620" width="1200" height="620"><g opacity="1"><path class="fe-main" fill="none" d="M208,194 Q228,194 241.52,194" stroke="#2E8C81" stroke-width="2" stroke-linecap="butt" stroke-opacity="1"></path><path class="fe-a1" fill="#2E8C81" d="M248,194 L239,198.95 L239,189.05 Z"></path><path class="fe-a2" fill="#2E8C81" d=""></path></g><g opacity="1"><path class="fe-main" fill="none" d="M456,194 Q476,194 489.52,194" stroke="#2E8C81" stroke-width="2" stroke-linecap="butt" stroke-opacity="1"></path><path class="fe-a1" fill="#2E8C81" d="M496,194 L487,198.95 L487,189.05 Z"></path><path class="fe-a2" fill="#2E8C81" d=""></path></g><g opacity="1"><path class="fe-main" fill="none" d="M704,194 Q724,194 737.52,194" stroke="#2E8C81" stroke-width="2" stroke-linecap="butt" stroke-opacity="1"></path><path class="fe-a1" fill="#2E8C81" d="M744,194 L735,198.95 L735,189.05 Z"></path><path class="fe-a2" fill="#2E8C81" d=""></path></g><g opacity="1"><path class="fe-main" fill="none" d="M952,194 Q972,194 985.52,194" stroke="#2E8C81" stroke-width="2" stroke-linecap="butt" stroke-opacity="1"></path><path class="fe-a1" fill="#2E8C81" d="M992,194 L983,198.95 L983,189.05 Z"></path><path class="fe-a2" fill="#2E8C81" d=""></path></g></svg>
+
+    <div class="fig-node nd plain" id="d1-title" style="left:0px;top:0px;width:1200px;height:78px">
+      <div class="t">2차 전문진단 (2학기)</div>
+      <div class="s">신규 학생 대상 · <span class="b">9. 14.(월) ~ 9. 23.(수)</span> · 수업 개시(9. 21.) 전 완료 권장</div>
+    </div>
+
+    <div class="fig-node nd step" id="d1-s1" style="left:0px;top:98px;width:208px;height:192px">
+      <span class="badge">1</span>
+      <div class="h">진단 담당 배정</div>
+      <div>진단 담당 상담사와 학교를 짝지어 배정합니다.</div>
+    </div>
+
+    <div class="fig-node nd step" id="d1-s2" style="left:248px;top:98px;width:208px;height:192px">
+      <span class="badge">2</span>
+      <div class="h">방문 일정 조율</div>
+      <div>학교와 방문 날짜·시간을 맞추고 안내합니다. 학생 명단 첨부는 <span class="b">암호 설정</span>이 필수입니다.</div>
+    </div>
+
+    <div class="fig-node nd step" id="d1-s3" style="left:496px;top:98px;width:208px;height:192px">
+      <span class="badge">3</span>
+      <div class="h">진단도구 준비</div>
+      <div>학습진단도구 책자를 학교 수에 맞춰 준비해 배부합니다.</div>
+    </div>
+
+    <div class="fig-node nd step" id="d1-s4" style="left:744px;top:98px;width:208px;height:192px">
+      <span class="badge">4</span>
+      <div class="h">방문 진단 실시</div>
+      <div>담당 상담사가 학교를 방문해 학생을 진단하고, 학교별 실시 여부를 확인합니다.</div>
+    </div>
+
+    <div class="fig-node nd step" id="d1-s5" style="left:992px;top:98px;width:208px;height:192px">
+      <span class="badge">5</span>
+      <div class="h">결과 수합·확정</div>
+      <div>결과보고서를 수합하고 학생별 맞춤 프로그램 유형을 확정합니다.</div>
+    </div>
+
+    <div class="fig-edge" data-from="d1-s1" data-to="d1-s2" data-anchor-from="right" data-anchor-to="left" data-color="#2E8C81" data-width="2" data-arrow="end"></div>
+    <div class="fig-edge" data-from="d1-s2" data-to="d1-s3" data-anchor-from="right" data-anchor-to="left" data-color="#2E8C81" data-width="2" data-arrow="end"></div>
+    <div class="fig-edge" data-from="d1-s3" data-to="d1-s4" data-anchor-from="right" data-anchor-to="left" data-color="#2E8C81" data-width="2" data-arrow="end"></div>
+    <div class="fig-edge" data-from="d1-s4" data-to="d1-s5" data-anchor-from="right" data-anchor-to="left" data-color="#2E8C81" data-width="2" data-arrow="end"></div>
+
+    <div class="fig-node nd key" id="d1-c1" style="left:0px;top:318px;width:386px;height:160px">
+      <div class="h">대상</div>
+      <div>2학기 <span class="b">신규 학생</span>입니다. 지속 학생은 1학기에 진단을 마쳤습니다.</div>
+      <div class="cap mt">2학기 선정 결과 통보 9. 14.(월)</div>
+    </div>
+
+    <div class="fig-node nd info" id="d1-c2" style="left:407px;top:318px;width:386px;height:160px">
+      <div class="h">진단 도구</div>
+      <div>학습진단도구 책자로 진단합니다.</div>
+      <div class="tags">
+        <span class="chip n">읽기쓰기</span>
+        <span class="chip n">수와연산</span>
+        <span class="chip n">도형측정</span>
+      </div>
+      <div class="cap mt">진단도구 책자는 연수 때 배부하고, 부족분은 센터에서 수령합니다.</div>
+    </div>
+
+    <div class="fig-node nd warn" id="d1-c3" style="left:814px;top:318px;width:386px;height:160px">
+      <div class="h">결과물과 제출</div>
+      <div>2차 전문진단 결과 보고서(첨부1-②)와 진단 일정표를 만듭니다.</div>
+      <div class="cap mt">학기당 1회 필수 제출이고, 코칭단은 첫 수업 후 작성해 PDF로 보냅니다.</div>
+    </div>
+
+    <div class="fig-node nd warn" id="d1-note" style="left:0px;top:502px;width:1200px;height:78px">
+      <div><span class="b">일정 주의</span> · 9. 21.(월) 수업 개시 전에 진단을 마치는 것이 안전합니다. 9. 24.(목) ~ 25.(금)은 추석 연휴라 방문 일정을 잡기 어렵습니다.</div>
+    </div>
+
+  </div>
+
+  <div class="stage-sep"></div>
+
+  <!-- ================= 2. 첫 멘토링 주 ================= -->
+  <div class="fig-canvas" data-size="1200x640" style="width: 1200px; height: 640px;"><svg class="fig-edges" viewBox="0 0 1200 640" width="1200" height="640"><g opacity="1"><path class="fe-main" fill="none" d="M282,150 Q294,150 299.52,150" stroke="#2E8C81" stroke-width="2" stroke-linecap="butt" stroke-opacity="1"></path><path class="fe-a1" fill="#2E8C81" d="M306,150 L297,154.95 L297,145.05 Z"></path><path class="fe-a2" fill="#2E8C81" d=""></path></g><g opacity="1"><path class="fe-main" fill="none" d="M588,150 Q600,150 605.52,150" stroke="#2E8C81" stroke-width="2" stroke-linecap="butt" stroke-opacity="1"></path><path class="fe-a1" fill="#2E8C81" d="M612,150 L603,154.95 L603,145.05 Z"></path><path class="fe-a2" fill="#2E8C81" d=""></path></g><g opacity="1"><path class="fe-main" fill="none" d="M894,150 Q906,150 911.52,150" stroke="#B54C40" stroke-width="2" stroke-linecap="butt" stroke-dasharray="6 4.8" stroke-opacity="1"></path><path class="fe-a1" fill="#B54C40" d="M918,150 L909,154.95 L909,145.05 Z"></path><path class="fe-a2" fill="#B54C40" d=""></path></g></svg>
+
+    <div class="fig-node nd plain" id="d2-title" style="left:0px;top:0px;width:1200px;height:78px">
+      <div class="t">첫 멘토링 주</div>
+      <div class="s">2학기 운영 <span class="b">9. 21.(월) ~ 11. 27.(금)</span> · 실제 수업일은 첫 주 <span class="b">9. 21.(월) ~ 9. 23.(수)</span> 3일입니다</div>
+    </div>
+
+    <div class="fig-node nd day" id="d2-d1" style="left:0px;top:96px;width:282px;height:108px">
+      <div class="dn">9. 21. (월)</div>
+      <div class="ds">수업 시작</div>
+      <div class="dd">담임 선생님께 인사하고 수업 장소를 확인합니다.</div>
+    </div>
+
+    <div class="fig-node nd day" id="d2-d2" style="left:306px;top:96px;width:282px;height:108px">
+      <div class="dn">9. 22. (화)</div>
+      <div class="ds">정규 수업</div>
+      <div class="dd">1일 2회기(초 80분 · 중 90분) 기준으로 진행합니다.</div>
+    </div>
+
+    <div class="fig-node nd day" id="d2-d3" style="left:612px;top:96px;width:282px;height:108px">
+      <div class="dn">9. 23. (수)</div>
+      <div class="ds">정규 수업</div>
+      <div class="dd">첫 주에 배부한 교재로 수업을 시작합니다.</div>
+    </div>
+
+    <div class="fig-node nd off day" id="d2-d4" style="left:918px;top:96px;width:282px;height:108px">
+      <div class="dn">9. 24. ~ 25.</div>
+      <div class="ds">추석 연휴, 수업 없음</div>
+      <div class="dd">보강이 필요하면 학교·학생과 조율해 센터에 알립니다.</div>
+    </div>
+
+    <div class="fig-edge" data-from="d2-d1" data-to="d2-d2" data-anchor-from="right" data-anchor-to="left" data-color="#2E8C81" data-width="2" data-arrow="end"></div>
+    <div class="fig-edge" data-from="d2-d2" data-to="d2-d3" data-anchor-from="right" data-anchor-to="left" data-color="#2E8C81" data-width="2" data-arrow="end"></div>
+    <div class="fig-edge" data-from="d2-d3" data-to="d2-d4" data-anchor-from="right" data-anchor-to="left" data-color="#B54C40" data-width="2" data-arrow="end" data-style="dashed"></div>
+
+    <div class="fig-node nd rules" id="d2-rules" style="left:0px;top:220px;width:1200px;height:62px">
+      <span class="r"><span class="b">1회기</span> 초 40분 · 중 45분</span>
+      <span class="r"><span class="b">기본 형태</span> 1일 2회기 1:1 (초 80분 · 중 90분)</span>
+      <span class="r"><span class="b">시간</span> 14:00 이후 시작 · 17:00 이내 종료</span>
+      <span class="r"><span class="b">장소</span> 학교 내 지정 장소</span>
+      <span class="r"><span class="b">수당</span> 1:2 수업도 회기당 지급</span>
+    </div>
+
+    <div class="fig-node nd" id="d2-c1" style="left:0px;top:300px;width:386px;height:148px">
+      <div class="h">지도계획서</div>
+      <div>학기당 1회, <span class="b">첫 수업 후</span> 작성해 제출합니다. 운영 기간·회기 수·학생 정보를 적고 자필 서명합니다.</div>
+    </div>
+
+    <div class="fig-node nd" id="d2-c2" style="left:407px;top:300px;width:386px;height:148px">
+      <div class="h">2차 진단결과보고서</div>
+      <div>학기당 1회 <span class="b">필수</span>입니다. 첫 수업 후 작성해 지도계획서와 함께 PDF로 보냅니다.</div>
+    </div>
+
+    <div class="fig-node nd" id="d2-c3" style="left:814px;top:300px;width:386px;height:148px">
+      <div class="h">교재 배부 확인</div>
+      <div>늘품이 교재를 학생에게 배부합니다. 수준이 안 맞거나 추가가 필요하면 센터에서 받아 갑니다.</div>
+    </div>
+
+    <div class="fig-node nd" id="d2-c4" style="left:0px;top:464px;width:386px;height:148px">
+      <div class="h">명찰 착용</div>
+      <div>학교를 방문할 때 항상 착용합니다. 연수에서 받은 명찰을 챙깁니다.</div>
+    </div>
+
+    <div class="fig-node nd" id="d2-c5" style="left:407px;top:464px;width:386px;height:148px">
+      <div class="h">지도일지</div>
+      <div>수업 날짜·요일·시간을 기록하고 담임 서명과 본인 자필 서명을 받습니다.</div>
+      <div class="cap mt">매월 말일 수업 종료 후 익월 첫 금요일까지 제출합니다.</div>
+    </div>
+
+    <div class="fig-node nd" id="d2-c6" style="left:814px;top:464px;width:386px;height:148px">
+      <div class="h">보강 · 학부모 상담</div>
+      <div>강사가 임의로 진행하지 않습니다. 학교·학생과 조율한 뒤 센터에 알리고 지도일지에 변경 날짜를 남깁니다.</div>
+    </div>
+
+  </div>
+
+  <p class="doc-foot">근거: 2026학년도 2학기 운영 안내 Ⅰ-3(전문 진단) · 2026학년도 서부기초학력지원센터 운영 계획(안) Ⅴ-3 · 2026 업무인수인계 Ⅳ · 코칭단 제출서류 양식(지도계획서, 2차진단결과보고서, 지도일지)</p>
+
+  <!-- ======== FIG:CONTENT END ======== -->
+
+</div>
+
+
+
+<script id="fig-static-js">/* fig-static: 창 폭에 맞춰 캔버스를 축소하는 뷰어. 편집 기능은 없다 */
+(function(){
+function fit(){Array.prototype.forEach.call(document.querySelectorAll(".fig-canvas"),function(cv){var m=(cv.getAttribute("data-size")||"").match(/^\s*(\d+)\s*[x\u00d7]\s*(\d+)/i);var w=m?+m[1]:cv.offsetWidth,h=m?+m[2]:cv.offsetHeight;cv.style.width=w+"px";cv.style.height=h+"px";var wrap=cv.parentElement;if(!wrap.classList.contains("fig-scale")){var d=document.createElement("div");d.className="fig-scale";cv.parentNode.insertBefore(d,cv);d.appendChild(cv);wrap=d;}var sc=Math.min(1,(wrap.clientWidth||w)/w);cv.style.transform=sc<1?"scale("+sc+")":"";wrap.style.height=(h*sc)+"px";});}
+window.addEventListener("resize",fit);if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",fit);else fit();
+var noop=function(){};
+/* html-deck 런타임 등이 부르는 편집 API는 빈 함수로 둔다 */
+window.FigEditor=window.FigEditor||{static:true,fitAll:fit,renderAll:noop,setEdit:noop,isEditing:function(){return false},selection:function(){return []},select:noop,clearSelection:noop,commit:noop,toast:noop,save:noop,serialize:function(){return "<!DOCTYPE html>\n"+document.documentElement.outerHTML},clean:function(){return document.body.innerHTML}};
+})();
+</script></body></html>
