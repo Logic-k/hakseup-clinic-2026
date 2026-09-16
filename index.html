@@ -187,10 +187,48 @@ footer b{color:var(--ink-2); font-weight:500}
   border-radius:var(--r); background:var(--surface); box-shadow:var(--shadow);
 }
 
+/* ── 제출서류 양식 ──────────────────────── */
+.forms-hero{
+  display:flex; gap:20px; align-items:center; flex-wrap:wrap;
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+  padding:16px 22px; box-shadow:var(--shadow); margin-bottom:14px;
+}
+.forms-hero p{flex:1 1 300px; margin:0; color:var(--ink-2); font-size:14px}
+.forms-hero p b{color:var(--ink)}
+.forms-hero .mascot img{width:116px; padding:6px 8px}
+
+.dl-grid{display:grid; gap:12px}
+.dl-card{
+  display:grid; grid-template-columns:auto 1fr auto; gap:16px; align-items:center;
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+  padding:15px 18px; box-shadow:var(--shadow);
+}
+.dl-no{
+  width:42px; height:42px; border-radius:12px; display:grid; place-items:center;
+  font-family:"Jua",sans-serif; font-size:20px; background:var(--brand-soft); color:var(--brand);
+}
+.dl-card h3{font-size:16.5px}
+.dl-card p{margin:3px 0 0; font-size:13px; color:var(--ink-2)}
+.dl-tag{
+  display:inline-block; margin-top:7px; font-size:11.5px; color:var(--ink-3);
+  border:1px solid var(--line); border-radius:999px; padding:1px 9px;
+}
+.dl-btn{
+  display:inline-flex; align-items:center; gap:7px; white-space:nowrap; text-decoration:none;
+  font-family:"Jua",sans-serif; font-size:14.5px; color:#fff; background:var(--brand);
+  padding:10px 18px; border-radius:11px;
+}
+.dl-btn:hover{background:var(--brand-2)}
+.dl-btn:focus-visible{outline:2px solid var(--brand); outline-offset:2px}
+.dl-btn svg{width:16px; height:16px; flex:0 0 auto}
+
 @media (max-width:560px){
   .wrap{padding:18px 13px 56px}
   .hero{padding:20px}
   .diag-frame{height:2500px}
+  .forms-hero{padding:15px 17px}
+  .dl-card{grid-template-columns:auto 1fr; gap:13px}
+  .dl-btn{grid-column:1 / -1; justify-content:center}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
 </style>
@@ -212,6 +250,7 @@ footer b{color:var(--ink-2); font-weight:500}
   <nav class="tabs" id="tabs" role="tablist" aria-label="페이지 구분">
     <button class="tab on" data-tab="schedule" role="tab" aria-selected="true">2학기 일정표</button>
     <button class="tab" data-tab="diag" role="tab" aria-selected="false">2차 진단 · 첫 멘토링 주</button>
+    <button class="tab" data-tab="forms" role="tab" aria-selected="false">2학기 제출서류 양식</button>
   </nav>
 
   <div class="tabpanel" id="tab-schedule" role="tabpanel">
@@ -257,6 +296,62 @@ footer b{color:var(--ink-2); font-weight:500}
       <span class="note">2026학년도 2학기 · 9. 21.(월) 수업 시작 전에 확인하세요</span>
     </div>
     <iframe class="diag-frame" id="diagFrame" src="diag.html?v=2" title="2차 진단 방법 및 첫 멘토링 주 도식"></iframe>
+  </div>
+
+  <div class="tabpanel" id="tab-forms" role="tabpanel" hidden>
+    <div class="sec-head">
+      <h2>2학기 제출서류 양식</h2>
+      <span class="note">학생·멘토용 · 각 양식을 내려받아 작성해 주세요</span>
+    </div>
+
+    <div class="forms-hero">
+      <p>2학기 찾아가는 학습클리닉 운영에 필요한 <b>제출서류 양식</b>입니다. 아래 버튼을 눌러 양식을 내려받은 뒤 작성하여 제출해 주세요.</p>
+      <div class="mascot">
+        <div class="bubble">양식도 즐겁게!</div>
+        <img src="duck.png" alt="학습클리닉 마스코트" width="564" height="350">
+      </div>
+    </div>
+
+    <div class="dl-grid">
+      <article class="dl-card">
+        <div class="dl-no">1</div>
+        <div>
+          <h3>2차 진단 결과 보고서</h3>
+          <p>2차 진단 결과 기록용 양식</p>
+          <span class="dl-tag">HWP · 2026-2학기</span>
+        </div>
+        <a class="dl-btn" href="forms/diagnosis-report.hwp" download="1. 2차진단결과보고서(2026-2학기).hwp">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 20h14"/></svg>
+          내려받기
+        </a>
+      </article>
+
+      <article class="dl-card">
+        <div class="dl-no">2</div>
+        <div>
+          <h3>지도 계획서</h3>
+          <p>학습지도 계획 작성용 양식</p>
+          <span class="dl-tag">HWP · 2026-2학기</span>
+        </div>
+        <a class="dl-btn" href="forms/teaching-plan.hwp" download="2. 지도계획서(2026-2학기).hwp">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 20h14"/></svg>
+          내려받기
+        </a>
+      </article>
+
+      <article class="dl-card">
+        <div class="dl-no">3</div>
+        <div>
+          <h3>지도 일지</h3>
+          <p>회차별 지도 내용 기록용 양식</p>
+          <span class="dl-tag">HWP · 2026-2학기</span>
+        </div>
+        <a class="dl-btn" href="forms/teaching-journal.hwp" download="3. 지도일지(2026-2학기).hwp">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 20h14"/></svg>
+          내려받기
+        </a>
+      </article>
+    </div>
   </div>
 
   <section>
