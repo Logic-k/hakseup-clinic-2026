@@ -155,6 +155,18 @@ section{margin-bottom:34px}
   padding:2px 9px; border-radius:999px; white-space:nowrap;
 }
 
+/* ── 안전수칙 포스터 ────────────────────── */
+.poster{
+  margin:0; background:var(--surface); border:1px solid var(--line);
+  border-radius:var(--r); box-shadow:var(--shadow); padding:16px 18px 14px;
+}
+.poster a{display:block}
+.poster img{
+  display:block; width:100%; max-width:820px; margin:0 auto;
+  border:1px solid var(--line); border-radius:10px;
+}
+.poster figcaption{font-size:12.5px; color:var(--ink-3); text-align:center; margin-top:11px}
+
 /* ── mascot img ─────────────────────────── */
 .mascot img{
   width:150px; height:auto; background:#fff;
@@ -227,6 +239,7 @@ footer b{color:var(--ink-2); font-weight:500}
   .hero{padding:20px}
   .diag-frame{height:2500px}
   .forms-hero{padding:15px 17px}
+  .poster{padding:12px 13px 11px}
   .dl-card{grid-template-columns:auto 1fr; gap:13px}
   .dl-btn{grid-column:1 / -1; justify-content:center}
 }
@@ -296,6 +309,19 @@ footer b{color:var(--ink-2); font-weight:500}
       <span class="note">2026학년도 2학기 · 9. 21.(월) 수업 시작 전에 확인하세요</span>
     </div>
     <iframe class="diag-frame" id="diagFrame" src="diag.html?v=2" title="2차 진단 방법 및 첫 멘토링 주 도식"></iframe>
+
+    <section>
+      <div class="sec-head">
+        <h2>학습클리닉 안전수칙</h2>
+        <span class="note">수업 전 꼭 확인하세요 · 이미지를 누르면 원본 크기로 볼 수 있습니다</span>
+      </div>
+      <figure class="poster">
+        <a href="학습클리닉_안전수칙_Version1.jpg" target="_blank" rel="noopener">
+          <img src="학습클리닉_안전수칙_Version1.jpg" alt="학습클리닉 안전수칙 4가지 — 1. 안전 공간과 관찰: 학교 내 지정된 장소에서 지도하기, 2. 존중하는 소통: 격려의 말 건네고 사적인 연락·개인 연락처 금지, 3. 신체 접촉·개인정보: 신체 접촉 금지와 개인정보 보호, 4. 비상시 대응: 학생 부상 시 즉시 담임교사에게 알리고 보건실 인계" width="1400" height="1526" loading="lazy" decoding="async">
+        </a>
+        <figcaption>지정된 장소에서 지도하고, 사적인 연락과 신체 접촉은 하지 않습니다. 학생이 다치면 즉시 담임교사에게 알려 주세요.</figcaption>
+      </figure>
+    </section>
   </div>
 
   <div class="tabpanel" id="tab-forms" role="tabpanel" hidden>
