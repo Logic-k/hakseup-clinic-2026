@@ -751,26 +751,44 @@ async function mkSend(payload){
 let mkTimer = null;
 let mkPending = null;     // 방금 접수한 신청 (시트 반영 확인용)
 let mkRetryTimer = null;
+let mkBackoffTimer = null;
+let mkBusy = false;
 
-function mkLoad(silent){
+const mkFail = text => { mkBoard.innerHTML = `<div class="mk-empty">${esc(text)}</div>`; };
+
+function mkLoad(silent, attempt){
+  attempt = attempt || 0;
+  if (mkBusy) return;                       // 이미 조회 중이면 중복 요청하지 않는다
   clearTimeout(mkTimer);
+  clearTimeout(mkBackoffTimer);
   if (!MAKEUP_API){ mkNote.textContent = '최근 신청순 · 이 브라우저에만 저장됨'; mkRender(mkLocalAll()); return; }
   mkNote.textContent = '최근 신청순';
   if (!silent) mkBoard.innerHTML = '<div class="mk-empty">신청 내역을 불러오는 중…</div>';
-  const cb = 'mkCb' + Date.now();
+
+  mkBusy = true;
+  const cb = 'mkCb' + Date.now() + '_' + attempt;
   const s  = document.createElement('script');
-  const cleanup = () => {
+  const finish = () => {
     clearTimeout(mkTimer);
+    mkBusy = false;
     try { delete window[cb]; } catch (e){ window[cb] = undefined; }
     if (s.parentNode) s.parentNode.removeChild(s);
   };
-  mkTimer = setTimeout(() => { cleanup(); mkFail('신청 내역을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'); }, 12000);
-  window[cb] = data => { cleanup(); mkRender((data && data.items) || []); };
-  s.onerror = () => { cleanup(); mkFail('신청 내역을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'); };
+  /* 일시적인 네트워크 실패(ERR_INSUFFICIENT_RESOURCES 등)에 대비해 몇 번 다시 시도한다 */
+  const retry = () => {
+    if (attempt < 2){
+      mkBackoffTimer = setTimeout(() => mkLoad(true, attempt + 1), 1200);
+    } else {
+      mkFail('신청 내역을 불러오지 못했습니다. [목록 새로고침]을 눌러 주세요.');
+    }
+  };
+
+  mkTimer = setTimeout(() => { finish(); retry(); }, 12000);
+  window[cb] = data => { finish(); mkRender((data && data.items) || []); };
+  s.onerror = () => { finish(); retry(); };
   s.src = MAKEUP_API + (MAKEUP_API.indexOf('?') >= 0 ? '&' : '?') + 'action=list&callback=' + cb;
   document.body.appendChild(s);
 }
-const mkFail = text => { mkBoard.innerHTML = `<div class="mk-empty">${esc(text)}</div>`; };
 
 const mkIsPending = it => !!mkPending
   && String(it.teacher  || '') === mkPending.teacher
