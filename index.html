@@ -749,11 +749,14 @@ async function mkSend(payload){
 
 /* 목록 조회: Apps Script는 JSONP로 읽는다 */
 let mkTimer = null;
-function mkLoad(){
+let mkPending = null;     // 방금 접수한 신청 (시트 반영 확인용)
+let mkRetryTimer = null;
+
+function mkLoad(silent){
   clearTimeout(mkTimer);
   if (!MAKEUP_API){ mkNote.textContent = '최근 신청순 · 이 브라우저에만 저장됨'; mkRender(mkLocalAll()); return; }
   mkNote.textContent = '최근 신청순';
-  mkBoard.innerHTML = '<div class="mk-empty">신청 내역을 불러오는 중…</div>';
+  if (!silent) mkBoard.innerHTML = '<div class="mk-empty">신청 내역을 불러오는 중…</div>';
   const cb = 'mkCb' + Date.now();
   const s  = document.createElement('script');
   const cleanup = () => {
@@ -769,7 +772,34 @@ function mkLoad(){
 }
 const mkFail = text => { mkBoard.innerHTML = `<div class="mk-empty">${esc(text)}</div>`; };
 
+const mkIsPending = it => !!mkPending
+  && String(it.teacher  || '') === mkPending.teacher
+  && String(it.fromDate || '') === mkPending.fromDate
+  && String(it.toDate   || '') === mkPending.toDate;
+
+/* no-cors 전송은 시트 기록 완료를 알려주지 않으므로,
+   방금 넣은 신청이 목록에 나타날 때까지 잠깐 간격을 두고 다시 읽는다. */
+function mkLoadUntilVisible(n){
+  clearTimeout(mkRetryTimer);
+  mkLoad(n > 0);
+  if (n < 3){
+    mkRetryTimer = setTimeout(() => { if (mkPending) mkLoadUntilVisible(n + 1); }, 1500);
+  } else {
+    mkRetryTimer = setTimeout(() => {
+      if (mkPending){
+        mkPending = null;
+        mkShowMsg('신청은 접수되었습니다. 시트 반영이 늦어지면 잠시 후 [목록 새로고침]을 눌러 확인해 주세요.', 'warn');
+      }
+    }, 1500);
+  }
+}
+
 function mkRender(items){
+  if (mkPending && items.some(mkIsPending)){
+    mkPending = null;
+    clearTimeout(mkRetryTimer);
+    mkShowMsg('보강 신청이 접수되었습니다. 아래 목록에서 확인해 주세요.', '');
+  }
   if (!items.length){
     mkBoard.innerHTML = '<div class="mk-empty">아직 보강 신청 내역이 없습니다.</div>';
     return;
@@ -823,11 +853,14 @@ mkForm.addEventListener('submit', async e => {
     mkForm.reset();
     document.getElementById('mkFromHint').textContent = '달력에서 날짜를 지정하세요.';
     document.getElementById('mkToHint').textContent   = '달력에서 날짜를 지정하세요.';
-    mkShowMsg(MAKEUP_API
-      ? '보강 신청이 접수되었습니다. 아래 목록에서 확인해 주세요.'
-      : '보강 신청이 이 브라우저에 저장되었습니다. 아직 공유 시트가 연결되지 않아 다른 사람에게는 보이지 않습니다.',
-      MAKEUP_API ? '' : 'warn');
-    mkLoad();
+    if (MAKEUP_API){
+      mkPending = { teacher: data.teacher, fromDate: data.fromDate, toDate: data.toDate };
+      mkShowMsg('접수되었습니다. 목록에 반영되는지 확인하는 중…', '');
+      mkLoadUntilVisible(0);
+    } else {
+      mkShowMsg('보강 신청이 이 브라우저에 저장되었습니다. 아직 공유 시트가 연결되지 않아 다른 사람에게는 보이지 않습니다.', 'warn');
+      mkLoad();
+    }
   } catch (err){
     mkShowMsg('전송에 실패했습니다. 잠시 후 다시 시도해 주세요.', 'err');
   } finally {
@@ -836,7 +869,12 @@ mkForm.addEventListener('submit', async e => {
   }
 });
 document.getElementById('mkReset').addEventListener('click', () => { mkMsg.hidden = true; });
-document.getElementById('mkReload').addEventListener('click', mkLoad);
+document.getElementById('mkReload').addEventListener('click', () => {
+  mkPending = null;
+  clearTimeout(mkRetryTimer);
+  mkShowMsg('목록을 새로고침했습니다.', '');
+  mkLoad();
+});
 
 if (!MAKEUP_API){
   mkSetup.textContent = '지금은 이 브라우저에만 저장됩니다. 모든 강사가 함께 보는 게시판으로 쓰려면 apps-script/README.md 안내에 따라 Google 시트를 연결해 주세요.';
