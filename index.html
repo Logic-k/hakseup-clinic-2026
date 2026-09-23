@@ -747,47 +747,40 @@ async function mkSend(payload){
   mkLocalAdd(Object.assign({ time: mkStamp(), status: '신청' }, payload));
 }
 
-/* 목록 조회: Apps Script는 JSONP로 읽는다 */
-let mkTimer = null;
+/* 목록 조회: Apps Script 응답에 Access-Control-Allow-Origin: * 가 있어 fetch 로 읽는다.
+   (script 태그 주입 방식은 리다이렉트·차단 환경에서 실패할 수 있어 쓰지 않는다.) */
 let mkPending = null;     // 방금 접수한 신청 (시트 반영 확인용)
 let mkRetryTimer = null;
 let mkBackoffTimer = null;
 let mkBusy = false;
 
+const mkApiUrl = extra => MAKEUP_API + (MAKEUP_API.indexOf('?') >= 0 ? '&' : '?') + extra;
 const mkFail = text => { mkBoard.innerHTML = `<div class="mk-empty">${esc(text)}</div>`; };
 
 function mkLoad(silent, attempt){
   attempt = attempt || 0;
-  if (mkBusy) return;                       // 이미 조회 중이면 중복 요청하지 않는다
-  clearTimeout(mkTimer);
+  if (mkBusy) return Promise.resolve();     // 이미 조회 중이면 중복 요청하지 않는다
   clearTimeout(mkBackoffTimer);
-  if (!MAKEUP_API){ mkNote.textContent = '최근 신청순 · 이 브라우저에만 저장됨'; mkRender(mkLocalAll()); return; }
+  if (!MAKEUP_API){
+    mkNote.textContent = '최근 신청순 · 이 브라우저에만 저장됨';
+    mkRender(mkLocalAll());
+    return Promise.resolve();
+  }
   mkNote.textContent = '최근 신청순';
   if (!silent) mkBoard.innerHTML = '<div class="mk-empty">신청 내역을 불러오는 중…</div>';
 
   mkBusy = true;
-  const cb = 'mkCb' + Date.now() + '_' + attempt;
-  const s  = document.createElement('script');
-  const finish = () => {
-    clearTimeout(mkTimer);
-    mkBusy = false;
-    try { delete window[cb]; } catch (e){ window[cb] = undefined; }
-    if (s.parentNode) s.parentNode.removeChild(s);
-  };
-  /* 일시적인 네트워크 실패(ERR_INSUFFICIENT_RESOURCES 등)에 대비해 몇 번 다시 시도한다 */
-  const retry = () => {
-    if (attempt < 2){
-      mkBackoffTimer = setTimeout(() => mkLoad(true, attempt + 1), 1200);
-    } else {
-      mkFail('신청 내역을 불러오지 못했습니다. [목록 새로고침]을 눌러 주세요.');
-    }
-  };
-
-  mkTimer = setTimeout(() => { finish(); retry(); }, 12000);
-  window[cb] = data => { finish(); mkRender((data && data.items) || []); };
-  s.onerror = () => { finish(); retry(); };
-  s.src = MAKEUP_API + (MAKEUP_API.indexOf('?') >= 0 ? '&' : '?') + 'action=list&callback=' + cb;
-  document.body.appendChild(s);
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 30000);   // Apps Script 첫 호출은 느릴 수 있다
+  return fetch(mkApiUrl('action=list&_=' + Date.now()), { cache: 'no-store', signal: ctrl.signal })
+    .then(res => { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
+    .then(data => { clearTimeout(timer); mkBusy = false; mkRender((data && data.items) || []); })
+    .catch(() => {
+      clearTimeout(timer);
+      mkBusy = false;
+      if (attempt < 2) mkBackoffTimer = setTimeout(() => mkLoad(true, attempt + 1), 1500);
+      else mkFail('신청 내역을 불러오지 못했습니다. [목록 새로고침]을 눌러 주세요.');
+    });
 }
 
 const mkIsPending = it => !!mkPending
@@ -795,21 +788,19 @@ const mkIsPending = it => !!mkPending
   && String(it.fromDate || '') === mkPending.fromDate
   && String(it.toDate   || '') === mkPending.toDate;
 
-/* no-cors 전송은 시트 기록 완료를 알려주지 않으므로,
+/* 전송(no-cors)은 시트 기록 완료를 알려주지 않으므로,
    방금 넣은 신청이 목록에 나타날 때까지 잠깐 간격을 두고 다시 읽는다. */
 function mkLoadUntilVisible(n){
   clearTimeout(mkRetryTimer);
-  mkLoad(n > 0);
-  if (n < 3){
-    mkRetryTimer = setTimeout(() => { if (mkPending) mkLoadUntilVisible(n + 1); }, 1500);
-  } else {
-    mkRetryTimer = setTimeout(() => {
-      if (mkPending){
-        mkPending = null;
-        mkShowMsg('신청은 접수되었습니다. 시트 반영이 늦어지면 잠시 후 [목록 새로고침]을 눌러 확인해 주세요.', 'warn');
-      }
-    }, 1500);
-  }
+  Promise.resolve(mkLoad(n > 0, 0)).then(() => {
+    if (!mkPending) return;
+    if (n < 3){
+      mkRetryTimer = setTimeout(() => { if (mkPending) mkLoadUntilVisible(n + 1); }, 1500);
+    } else {
+      mkPending = null;
+      mkShowMsg('신청은 접수되었습니다. 시트 반영이 늦어지면 잠시 후 [목록 새로고침]을 눌러 확인해 주세요.', 'warn');
+    }
+  });
 }
 
 function mkRender(items){
