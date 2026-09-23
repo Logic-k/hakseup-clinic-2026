@@ -22,7 +22,8 @@ function getSheet_() {
     sh.getRange(1, 1, 1, HEADERS.length).setFontWeight('bold');
     sh.setFrozenRows(1);
   }
-  // 날짜·시간 열은 자동 변환되지 않도록 텍스트 서식으로 둔다. (E ~ H)
+  // 날짜·시간 열이 자동으로 날짜 값으로 바뀌지 않도록 텍스트 서식으로 둔다. (A, E ~ H)
+  sh.getRange('A:A').setNumberFormat('@');
   sh.getRange('E:H').setNumberFormat('@');
   return sh;
 }
@@ -32,6 +33,14 @@ function normText_(v) {
   if (v === null || v === undefined) return '';
   if (Object.prototype.toString.call(v) === '[object Date]') {
     return Utilities.formatDate(v, 'Asia/Seoul', 'yyyy-MM-dd');
+  }
+  return String(v);
+}
+/** 접수시각은 날짜와 시각을 함께 남긴다. */
+function normStamp_(v) {
+  if (v === null || v === undefined || v === '') return '';
+  if (Object.prototype.toString.call(v) === '[object Date]') {
+    return Utilities.formatDate(v, 'Asia/Seoul', 'yyyy-MM-dd HH:mm');
   }
   return String(v);
 }
@@ -66,7 +75,7 @@ function doGet(e) {
         var r = rows[i];
         if (!r[1] && !r[4] && !r[6]) continue; // 빈 행 건너뛰기
         items.push({
-          time:     normText_(r[0]),
+          time:     normStamp_(r[0]),
           teacher:  normText_(r[1]),
           school:   normText_(r[2]),
           student:  normText_(r[3]),
