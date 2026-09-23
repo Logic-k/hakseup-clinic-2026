@@ -234,6 +234,81 @@ footer b{color:var(--ink-2); font-weight:500}
 .dl-btn:focus-visible{outline:2px solid var(--brand); outline-offset:2px}
 .dl-btn svg{width:16px; height:16px; flex:0 0 auto}
 
+/* ── 보강 신청 ──────────────────────────── */
+.mk-intro{
+  display:flex; gap:20px; align-items:center; flex-wrap:wrap;
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+  padding:16px 22px; box-shadow:var(--shadow); margin-bottom:16px;
+}
+.mk-intro p{flex:1 1 320px; margin:0; color:var(--ink-2); font-size:14px}
+.mk-intro p b{color:var(--ink)}
+.mk-intro .mascot img{width:104px; padding:6px 8px}
+
+.mk-form{display:grid; gap:15px}
+.mk-grid{display:grid; gap:13px; grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+.field{display:grid; gap:6px; align-content:start; min-width:0}
+.field > label{font-size:13px; font-weight:700; color:var(--ink-2)}
+.field .req{color:var(--rest)}
+.field input,.field textarea{
+  font:inherit; font-size:14px; color:var(--ink); background:var(--surface-2);
+  border:1px solid var(--line); border-radius:10px; padding:10px 12px; width:100%;
+}
+.field input:hover,.field textarea:hover{border-color:var(--brand-2)}
+.field input:focus-visible,.field textarea:focus-visible{
+  outline:2px solid var(--brand); outline-offset:1px; background:var(--surface);
+}
+.field textarea{resize:vertical; min-height:76px; line-height:1.6}
+.field .hint{font-size:11.5px; color:var(--ink-3); word-break:keep-all}
+.field .hint.warn{color:var(--accent)}
+.mk-sub{
+  font-family:"Jua","Noto Sans KR",sans-serif; font-size:15px; color:var(--brand);
+  display:flex; align-items:center; gap:10px; margin-top:2px;
+}
+.mk-sub::after{content:""; flex:1; height:1px; background:var(--line)}
+
+.mk-actions{display:flex; gap:10px; align-items:center; flex-wrap:wrap; padding-top:3px}
+.btn{
+  font-family:"Jua","Noto Sans KR",sans-serif; font-size:15px; cursor:pointer;
+  border-radius:11px; padding:11px 22px; border:1px solid transparent; white-space:nowrap;
+}
+.btn.primary{background:var(--brand); color:#fff}
+.btn.primary:hover{background:var(--brand-2)}
+.btn.ghost{background:var(--surface-2); color:var(--ink-2); border-color:var(--line)}
+.btn.ghost:hover{color:var(--ink); border-color:var(--brand-2)}
+.btn:focus-visible{outline:2px solid var(--brand); outline-offset:2px}
+.btn[disabled]{opacity:.55; cursor:default}
+
+.mk-msg{
+  font-size:13px; border-radius:10px; padding:10px 13px;
+  background:var(--brand-soft); color:var(--brand); word-break:keep-all;
+}
+.mk-msg.warn{background:var(--accent-soft); color:var(--accent)}
+.mk-msg.err{background:var(--rest-soft); color:var(--rest)}
+.mk-msg[hidden]{display:none}
+
+.mk-board{display:grid; gap:11px}
+.mk-card{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+  padding:14px 17px; box-shadow:var(--shadow); display:grid; gap:9px;
+}
+.mk-card .top{display:flex; gap:10px; align-items:baseline; justify-content:space-between; flex-wrap:wrap}
+.mk-card .who{font-size:14px; color:var(--ink-2); word-break:keep-all}
+.mk-card .who b{color:var(--ink); font-weight:700}
+.mk-badge{
+  font-family:"Jua",sans-serif; font-size:12px; padding:2px 11px; border-radius:999px;
+  background:var(--brand-soft); color:var(--brand); white-space:nowrap;
+}
+.mk-change{display:flex; align-items:center; gap:9px; flex-wrap:wrap; font-family:"Jua",sans-serif; font-size:15px}
+.mk-change .from{color:var(--ink-3); text-decoration:line-through}
+.mk-change .arrow{color:var(--ink-3); font-family:"Noto Sans KR",sans-serif; font-size:13px}
+.mk-change .to{color:var(--brand)}
+.mk-reason{font-size:13px; color:var(--ink-2); word-break:keep-all}
+.mk-meta{font-size:11.5px; color:var(--ink-3); font-variant-numeric:tabular-nums}
+.mk-empty{
+  text-align:center; color:var(--ink-3); font-size:13.5px;
+  background:var(--surface); border:1px dashed var(--line); border-radius:var(--r); padding:26px 18px;
+}
+
 @media (max-width:560px){
   .wrap{padding:18px 13px 56px}
   .hero{padding:20px}
@@ -242,6 +317,9 @@ footer b{color:var(--ink-2); font-weight:500}
   .poster{padding:12px 13px 11px}
   .dl-card{grid-template-columns:auto 1fr; gap:13px}
   .dl-btn{grid-column:1 / -1; justify-content:center}
+  .mk-intro{padding:15px 17px}
+  .mk-grid{grid-template-columns:1fr}
+  .mk-actions .btn{flex:1 1 100%; text-align:center}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
 </style>
@@ -264,6 +342,7 @@ footer b{color:var(--ink-2); font-weight:500}
     <button class="tab on" data-tab="schedule" role="tab" aria-selected="true">2학기 일정표</button>
     <button class="tab" data-tab="diag" role="tab" aria-selected="false">2차 진단 · 첫 멘토링 주</button>
     <button class="tab" data-tab="forms" role="tab" aria-selected="false">2학기 제출서류 양식</button>
+    <button class="tab" data-tab="makeup" role="tab" aria-selected="false">보강 신청</button>
   </nav>
 
   <div class="tabpanel" id="tab-schedule" role="tabpanel">
@@ -380,6 +459,97 @@ footer b{color:var(--ink-2); font-weight:500}
     </div>
   </div>
 
+  <div class="tabpanel" id="tab-makeup" role="tabpanel" hidden>
+    <div class="sec-head">
+      <h2>보강 신청</h2>
+      <span class="note">일자 변경·보강은 학교·학생과 조율한 뒤 신청해 주세요</span>
+    </div>
+
+    <div class="mk-intro">
+      <p>강사가 임의로 보강을 진행하지 않습니다. <b>학교·학생과 조율한 뒤</b> 아래에 신청하고, 지도일지에도 변경 날짜를 남겨 주세요.</p>
+      <div class="mascot">
+        <div class="bubble">날짜 바꿀 땐 여기!</div>
+        <img src="forms-duck.png" alt="학습클리닉 마스코트" width="86" height="99">
+      </div>
+    </div>
+
+    <section>
+      <div class="panel">
+        <h3>신청서 작성</h3>
+        <p class="cap"><span class="req" style="color:var(--rest)">*</span> 표시는 모두 입력해 주세요. 날짜는 달력에서 직접 지정할 수 있습니다.</p>
+        <form class="mk-form" id="mkForm" novalidate>
+
+          <div class="mk-sub">신청자</div>
+          <div class="mk-grid">
+            <div class="field">
+              <label for="mkTeacher">강사(멘토) 이름 <span class="req">*</span></label>
+              <input id="mkTeacher" name="teacher" type="text" autocomplete="name" required>
+            </div>
+            <div class="field">
+              <label for="mkSchool">학교 <span class="req">*</span></label>
+              <input id="mkSchool" name="school" type="text" required>
+            </div>
+            <div class="field">
+              <label for="mkStudent">학생(대상) <span class="req">*</span></label>
+              <input id="mkStudent" name="student" type="text" required>
+            </div>
+          </div>
+
+          <div class="mk-sub">변경되는 수업일</div>
+          <div class="mk-grid">
+            <div class="field">
+              <label for="mkFromDate">원래 수업일 <span class="req">*</span></label>
+              <input id="mkFromDate" name="fromDate" type="date" required>
+              <span class="hint" id="mkFromHint">달력에서 날짜를 지정하세요.</span>
+            </div>
+            <div class="field">
+              <label for="mkFromTime">원래 수업 시간</label>
+              <input id="mkFromTime" name="fromTime" type="time">
+              <span class="hint">모르면 비워 두셔도 됩니다.</span>
+            </div>
+          </div>
+
+          <div class="mk-sub">보강할 날짜</div>
+          <div class="mk-grid">
+            <div class="field">
+              <label for="mkToDate">보강 날짜 <span class="req">*</span></label>
+              <input id="mkToDate" name="toDate" type="date" required>
+              <span class="hint" id="mkToHint">달력에서 날짜를 지정하세요.</span>
+            </div>
+            <div class="field">
+              <label for="mkToTime">보강 시간 <span class="req">*</span></label>
+              <input id="mkToTime" name="toTime" type="time" required>
+              <span class="hint">14:00 이후 시작 · 17:00 이내 종료</span>
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="mkReason">사유 · 비고</label>
+            <textarea id="mkReason" name="reason" placeholder="예: 학교 행사로 10/14 수업을 10/17로 옮깁니다."></textarea>
+          </div>
+
+          <div class="mk-actions">
+            <button class="btn primary" type="submit" id="mkSubmit">신청하기</button>
+            <button class="btn ghost" type="reset" id="mkReset">입력 지우기</button>
+          </div>
+          <div class="mk-msg" id="mkMsg" role="status" hidden></div>
+        </form>
+      </div>
+    </section>
+
+    <section>
+      <div class="sec-head">
+        <h2>보강 신청 내역</h2>
+        <span class="note" id="mkBoardNote">최근 신청순</span>
+      </div>
+      <div class="mk-msg warn" id="mkSetup" hidden></div>
+      <div class="mk-board" id="mkBoard"></div>
+      <div class="mk-actions" style="margin-top:12px">
+        <button class="btn ghost" type="button" id="mkReload">목록 새로고침</button>
+      </div>
+    </section>
+  </div><!-- /tab-makeup -->
+
   <section>
     <div class="sec-head">
       <h2>문의 · 댓글</h2>
@@ -490,6 +660,190 @@ function month(m){
 }
 document.getElementById('cals').innerHTML = [9,10,11].map(month).join('');
 
+/* ── 보강 신청 ─────────────────────────── */
+/* Google Apps Script 웹앱을 배포한 뒤 그 URL(/exec)을 아래에 붙여넣으세요.
+   배포 방법은 같은 저장소의 apps-script/README.md 를 참고하세요.
+   비워 두면 이 브라우저에만 저장되며, 다른 사람에게는 보이지 않습니다. */
+const MAKEUP_API = '';
+
+const MK_KEY = 'hakseup-clinic-2026-makeup';
+const mkForm  = document.getElementById('mkForm');
+const mkMsg   = document.getElementById('mkMsg');
+const mkBoard = document.getElementById('mkBoard');
+const mkSetup = document.getElementById('mkSetup');
+const mkNote  = document.getElementById('mkBoardNote');
+const mkSubmitBtn = document.getElementById('mkSubmit');
+
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+  ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+
+const mkWd = iso => {
+  if (!iso) return '';
+  const p = String(iso).split('-').map(Number);
+  if (!p[0] || !p[1] || !p[2]) return '';
+  return DOW[new Date(p[0], p[1] - 1, p[2]).getDay()] + '요일';
+};
+const mkShort = iso => {
+  if (!iso) return '—';
+  const p = String(iso).split('-').map(Number);
+  if (!p[0] || !p[1] || !p[2]) return iso;
+  return `${p[1]}/${p[2]}(${mkWd(iso).charAt(0)})`;
+};
+const mkStamp = () => {
+  const p = n => String(n).padStart(2, '0'), t = new Date();
+  return `${t.getFullYear()}-${p(t.getMonth()+1)}-${p(t.getDate())} ${p(t.getHours())}:${p(t.getMinutes())}`;
+};
+
+const mkShowMsg = (text, kind) => {
+  mkMsg.textContent = text;
+  mkMsg.className = 'mk-msg' + (kind ? ' ' + kind : '');
+  mkMsg.hidden = false;
+};
+
+/* 날짜를 지정하면 요일과 수업일 여부를 알려 준다 */
+function mkBindDate(inputId, hintId, isMakeup){
+  const input = document.getElementById(inputId);
+  const hint  = document.getElementById(hintId);
+  if (!input) return;
+  input.min = D(9,1);
+  input.max = D(12,31);
+  const fresh = '달력에서 날짜를 지정하세요.';
+  input.addEventListener('change', () => {
+    const v = input.value;
+    if (!v){ hint.textContent = fresh; hint.className = 'hint'; return; }
+    const wd = mkWd(v);
+    if (isMakeup || LESSON_SET.has(v)){
+      hint.textContent = `${v} (${wd})` + (isMakeup ? '' : ' · 표준 수업일');
+      hint.className = 'hint';
+    } else if (OFF[v]){
+      hint.textContent = `${v} (${wd}) · ${OFF[v]}로 수업이 없는 날입니다.`;
+      hint.className = 'hint warn';
+    } else {
+      hint.textContent = `${v} (${wd}) · 표준 수업일이 아닙니다. 확인해 주세요.`;
+      hint.className = 'hint warn';
+    }
+  });
+}
+mkBindDate('mkFromDate', 'mkFromHint', false);
+mkBindDate('mkToDate',   'mkToHint',   true);
+
+/* 로컬 저장(시트 미연결 시) */
+function mkLocalAll(){
+  try { return JSON.parse(localStorage.getItem(MK_KEY) || '[]') || []; } catch (e){ return []; }
+}
+function mkLocalAdd(item){
+  const all = mkLocalAll();
+  all.unshift(item);
+  try { localStorage.setItem(MK_KEY, JSON.stringify(all.slice(0, 300))); } catch (e){}
+}
+
+async function mkSend(payload){
+  if (MAKEUP_API){
+    const body = new URLSearchParams();
+    Object.keys(payload).forEach(k => body.append(k, payload[k] == null ? '' : payload[k]));
+    await fetch(MAKEUP_API, { method: 'POST', mode: 'no-cors', body });
+    return;
+  }
+  mkLocalAdd(Object.assign({ time: mkStamp(), status: '신청' }, payload));
+}
+
+/* 목록 조회: Apps Script는 JSONP로 읽는다 */
+let mkTimer = null;
+function mkLoad(){
+  clearTimeout(mkTimer);
+  if (!MAKEUP_API){ mkNote.textContent = '최근 신청순 · 이 브라우저에만 저장됨'; mkRender(mkLocalAll()); return; }
+  mkNote.textContent = '최근 신청순';
+  mkBoard.innerHTML = '<div class="mk-empty">신청 내역을 불러오는 중…</div>';
+  const cb = 'mkCb' + Date.now();
+  const s  = document.createElement('script');
+  const cleanup = () => {
+    clearTimeout(mkTimer);
+    try { delete window[cb]; } catch (e){ window[cb] = undefined; }
+    if (s.parentNode) s.parentNode.removeChild(s);
+  };
+  mkTimer = setTimeout(() => { cleanup(); mkFail('신청 내역을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'); }, 12000);
+  window[cb] = data => { cleanup(); mkRender((data && data.items) || []); };
+  s.onerror = () => { cleanup(); mkFail('신청 내역을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.'); };
+  s.src = MAKEUP_API + (MAKEUP_API.indexOf('?') >= 0 ? '&' : '?') + 'action=list&callback=' + cb;
+  document.body.appendChild(s);
+}
+const mkFail = text => { mkBoard.innerHTML = `<div class="mk-empty">${esc(text)}</div>`; };
+
+function mkRender(items){
+  if (!items.length){
+    mkBoard.innerHTML = '<div class="mk-empty">아직 보강 신청 내역이 없습니다.</div>';
+    return;
+  }
+  mkBoard.innerHTML = items.map(it => {
+    const from = `${mkShort(it.fromDate)}${it.fromTime ? ` <span class="hint" style="font-size:13px">${esc(it.fromTime)}</span>` : ''}`;
+    const to   = `${mkShort(it.toDate)}${it.toTime ? ` <span class="hint" style="font-size:13px">${esc(it.toTime)}</span>` : ''}`;
+    const who  = `<b>${esc(it.teacher || '이름 없음')}</b> 강사`
+               + (it.school  ? ` · ${esc(it.school)}` : '')
+               + (it.student ? ` · 학생 ${esc(it.student)}` : '');
+    return `<article class="mk-card">
+      <div class="top">
+        <div class="who">${who}</div>
+        <span class="mk-badge">${esc(it.status || '신청')}</span>
+      </div>
+      <div class="mk-change">
+        <span class="from">${from}</span>
+        <span class="arrow">→</span>
+        <span class="to">${to}</span>
+      </div>
+      ${it.reason ? `<div class="mk-reason">사유 · ${esc(it.reason)}</div>` : ''}
+      <div class="mk-meta">접수 ${esc(it.time || '')}</div>
+    </article>`;
+  }).join('');
+}
+
+mkForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const data = {
+    teacher:  document.getElementById('mkTeacher').value.trim(),
+    school:   document.getElementById('mkSchool').value.trim(),
+    student:  document.getElementById('mkStudent').value.trim(),
+    fromDate: document.getElementById('mkFromDate').value,
+    fromTime: document.getElementById('mkFromTime').value,
+    toDate:   document.getElementById('mkToDate').value,
+    toTime:   document.getElementById('mkToTime').value,
+    reason:   document.getElementById('mkReason').value.trim()
+  };
+  if (!data.teacher || !data.school || !data.student || !data.fromDate || !data.toDate || !data.toTime){
+    mkShowMsg('필수 항목(*)을 모두 입력해 주세요.', 'err');
+    return;
+  }
+  if (data.fromDate === data.toDate){
+    mkShowMsg('원래 수업일과 보강 날짜가 같습니다. 확인해 주세요.', 'err');
+    return;
+  }
+  mkSubmitBtn.disabled = true;
+  mkSubmitBtn.textContent = '보내는 중…';
+  try {
+    await mkSend(data);
+    mkForm.reset();
+    document.getElementById('mkFromHint').textContent = '달력에서 날짜를 지정하세요.';
+    document.getElementById('mkToHint').textContent   = '달력에서 날짜를 지정하세요.';
+    mkShowMsg(MAKEUP_API
+      ? '보강 신청이 접수되었습니다. 아래 목록에서 확인해 주세요.'
+      : '보강 신청이 이 브라우저에 저장되었습니다. 아직 공유 시트가 연결되지 않아 다른 사람에게는 보이지 않습니다.',
+      MAKEUP_API ? '' : 'warn');
+    mkLoad();
+  } catch (err){
+    mkShowMsg('전송에 실패했습니다. 잠시 후 다시 시도해 주세요.', 'err');
+  } finally {
+    mkSubmitBtn.disabled = false;
+    mkSubmitBtn.textContent = '신청하기';
+  }
+});
+document.getElementById('mkReset').addEventListener('click', () => { mkMsg.hidden = true; });
+document.getElementById('mkReload').addEventListener('click', mkLoad);
+
+if (!MAKEUP_API){
+  mkSetup.textContent = '지금은 이 브라우저에만 저장됩니다. 모든 강사가 함께 보는 게시판으로 쓰려면 apps-script/README.md 안내에 따라 Google 시트를 연결해 주세요.';
+  mkSetup.hidden = false;
+}
+mkLoad();
+
 /* ── 탭 전환 ───────────────────────────── */
 const tabsEl = document.getElementById('tabs');
 const diagFrame = document.getElementById('diagFrame');
@@ -515,6 +869,7 @@ tabsEl.querySelectorAll('.tab').forEach(btn => {
       p.hidden = p.id !== 'tab-' + btn.dataset.tab;
     });
     if(btn.dataset.tab === 'diag') fitDiagFrame();
+    if(btn.dataset.tab === 'makeup') mkLoad();
   });
 });
 
