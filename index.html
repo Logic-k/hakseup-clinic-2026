@@ -234,6 +234,32 @@ footer b{color:var(--ink-2); font-weight:500}
 .dl-btn:focus-visible{outline:2px solid var(--brand); outline-offset:2px}
 .dl-btn svg{width:16px; height:16px; flex:0 0 auto}
 
+/* ── 제출 시 주의할 점(4컷 가이드) ──────── */
+.notice{margin-top:28px}
+.notice-lead{margin:0 0 15px; font-size:13.5px; color:var(--ink-2); word-break:keep-all}
+.notice-lead b{color:var(--ink)}
+.cut-grid{
+  list-style:none; margin:0; padding:0; display:grid; gap:14px;
+  grid-template-columns:repeat(auto-fit,minmax(215px,1fr));
+}
+.cut-grid > li{margin:0}
+.cut{
+  margin:0; background:var(--surface); border:1px solid var(--line); border-radius:var(--r);
+  box-shadow:var(--shadow); padding:12px 12px 13px; display:grid; gap:10px; align-content:start;
+}
+.cut .shot{
+  position:relative; border:1px solid var(--line); border-radius:10px; overflow:hidden;
+  background:var(--surface-2);
+}
+.cut .shot img{display:block; width:100%; height:auto}
+.cut .no{
+  position:absolute; top:8px; left:8px; width:26px; height:26px; border-radius:50%;
+  display:grid; place-items:center; font-family:"Jua",sans-serif; font-size:14px;
+  background:var(--brand); color:#fff; box-shadow:0 2px 6px rgba(0,0,0,.25);
+}
+.cut figcaption{font-size:12.5px; color:var(--ink-2); line-height:1.55; word-break:keep-all}
+.cut figcaption b{color:var(--ink); font-weight:700}
+
 /* ── 보강 신청 ──────────────────────────── */
 .mk-intro{
   display:flex; gap:20px; align-items:center; flex-wrap:wrap;
@@ -317,6 +343,9 @@ footer b{color:var(--ink-2); font-weight:500}
   .poster{padding:12px 13px 11px}
   .dl-card{grid-template-columns:auto 1fr; gap:13px}
   .dl-btn{grid-column:1 / -1; justify-content:center}
+  .cut-grid{gap:10px}
+  .cut{padding:9px 9px 11px}
+  .cut figcaption{font-size:11.5px}
   .mk-intro{padding:15px 17px}
   .mk-grid{grid-template-columns:1fr}
   .mk-actions .btn{flex:1 1 100%; text-align:center}
@@ -457,6 +486,40 @@ footer b{color:var(--ink-2); font-weight:500}
         </a>
       </article>
     </div>
+
+    <section class="notice" aria-labelledby="notice-h">
+      <div class="sec-head">
+        <h2 id="notice-h">제출 시 주의할 점</h2>
+        <span class="note">표 제목과 표 본문이 분리될 때 해결 방법</span>
+      </div>
+      <p class="notice-lead">한글(HWP)에서 <b>표 제목과 표 본문이 서로 다른 쪽으로 분리</b>되는 경우가 있습니다. 아래 순서대로 <b>‘글자처럼 취급’</b> 설정을 바꾸면 해결됩니다.</p>
+      <ol class="cut-grid">
+        <li>
+          <figure class="cut">
+            <div class="shot"><span class="no">1</span><img src="guide_click_final.png" alt="표 안에서 마우스 오른쪽 버튼을 누르는 화면" loading="lazy"></div>
+            <figcaption>표 안을 <b>마우스 오른쪽 버튼</b>으로 클릭합니다.</figcaption>
+          </figure>
+        </li>
+        <li>
+          <figure class="cut">
+            <div class="shot"><span class="no">2</span><img src="guide_step2_final.png" alt="나타난 메뉴에서 개체 속성을 선택하는 화면" loading="lazy"></div>
+            <figcaption>나타난 메뉴에서 <b>[개체 속성]</b>을 선택합니다.</figcaption>
+          </figure>
+        </li>
+        <li>
+          <figure class="cut">
+            <div class="shot"><span class="no">3</span><img src="guide_step3_final.png" alt="표/셀 속성 표 탭에서 글자처럼 취급이 체크된 화면" loading="lazy"></div>
+            <figcaption><b>[표/셀 속성] → [표] 탭</b>에서 ‘글자처럼 취급’이 <b>체크되어 있는지</b> 확인합니다.</figcaption>
+          </figure>
+        </li>
+        <li>
+          <figure class="cut">
+            <div class="shot"><span class="no">4</span><img src="guide_step4_final.png" alt="글자처럼 취급 체크를 해제한 화면" loading="lazy"></div>
+            <figcaption><b>‘글자처럼 취급’ 체크를 해제</b>하고 [설정]을 누르면 표 제목과 본문이 분리되지 않습니다.</figcaption>
+          </figure>
+        </li>
+      </ol>
+    </section>
   </div>
 
   <div class="tabpanel" id="tab-makeup" role="tabpanel" hidden>
