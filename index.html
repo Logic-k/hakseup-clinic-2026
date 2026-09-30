@@ -117,7 +117,6 @@ section{margin-bottom:34px}
 }
 .dow.sun{color:var(--rest)}
 .cell{
-  position:relative;
   min-height:98px; padding:7px 8px 9px; border-right:1px solid var(--line); border-bottom:1px solid var(--line);
   display:flex; flex-direction:column; gap:4px;
 }
@@ -140,22 +139,20 @@ section{margin-bottom:34px}
 .chip.doc{background:var(--surface-2); border-left-color:var(--brand-2); color:var(--ink)}
 .chip.off{background:transparent; border-left-color:var(--rest); color:var(--rest); font-weight:500}
 .chip.dead{background:var(--accent-soft); border-left-color:var(--accent); color:var(--accent); font-weight:700}
-.chip.span{background:var(--brand-soft); border-left-color:var(--brand-2); color:var(--brand); font-weight:700}
+.chip.span{background:var(--surface); border-left-color:var(--brand); color:var(--brand); font-weight:700}
 
-/* 기간 표시 바 (제출 기간 등) */
-.bar{
-  position:absolute; top:0; left:0; right:0; height:3px;
-  background:repeating-linear-gradient(90deg,var(--brand-2) 0 6px,transparent 6px 11px);
-  pointer-events:none;
-}
-.bar.start{left:0; right:auto; width:50%}
-.bar.end{right:0; left:auto; width:50%; background:repeating-linear-gradient(90deg,transparent 0 5px,var(--brand-2) 5px 11px)}
+/* 기간 표시: 구간 전체를 연하게 칠하고 시작·끝을 굵은 테두리로 구분한다 */
+.cell.span-day{background:var(--brand-soft)}
+.cell.span-day.sun .dnum{color:var(--rest)}
+.cell.span-first{box-shadow:inset 3px 0 0 var(--brand), inset 0 3px 0 var(--brand)}
+.cell.span-last{box-shadow:inset -3px 0 0 var(--brand), inset 0 3px 0 var(--brand), inset 0 -3px 0 var(--brand)}
+.cell.span-first.span-last{box-shadow:inset 3px 0 0 var(--brand), inset -3px 0 0 var(--brand), inset 0 3px 0 var(--brand), inset 0 -3px 0 var(--brand)}
 
 /* ── legend ─────────────────────────────── */
 .legend{display:flex; gap:8px 18px; flex-wrap:wrap; margin-top:12px; font-size:12.5px; color:var(--ink-2)}
 .legend span{display:inline-flex; align-items:center; gap:6px}
 .sw{width:12px; height:12px; border-radius:4px; flex:0 0 auto}
-.sw.bar-legend{background:repeating-linear-gradient(90deg,var(--brand-2) 0 4px,transparent 4px 7px); border-radius:2px}
+.sw.span-legend{background:var(--brand-soft); border:1px solid var(--brand); border-radius:2px}
 
 /* ── guide panel ────────────────────────── */
 .panel{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:18px 20px}
@@ -406,7 +403,7 @@ footer b{color:var(--ink-2); font-weight:500}
       <span><i class="sw" style="background:var(--accent)"></i>제출 마감</span>
       <span><i class="sw" style="background:var(--rest)"></i>공휴일(수업 없음)</span>
       <span><i class="dot"></i>수업일</span>
-      <span><i class="sw bar-legend"></i>제출 기간</span>
+      <span><i class="sw span-legend"></i>제출 기간</span>
     </div>
   </section>
 
@@ -727,21 +724,22 @@ function month(m){
     if (off) cls.push('off'); else if (isLesson) cls.push('lesson');
     if (iso === todayISO) cls.push('today');
 
-    /* 기간 표시: 시작일은 왼쪽 반쪽, 끝일은 오른쪽 반쪽 점선을 그려 구간을 잇는다 */
-    let bar = '';
+    /* 기간 표시: 구간 전체를 연하게 칠하고, 시작일·끝일에만 굵은 테두리를 그린다 */
+    let spanChip = '';
     SPANS.forEach(sp => {
       if (iso < sp.from || iso > sp.to) return;
-      const edge = (iso === sp.from ? ' start' : '') + (iso === sp.to ? ' end' : '');
-      if (iso !== sp.from || iso !== sp.to) bar = `<i class="bar${edge}"></i>`;
-      /* 시작일에만 기간 이름을 붙여 점선 구간이 무엇인지 알 수 있게 한다 */
-      if (iso === sp.from) bar += `<div class="chip span">${sp.label}</div>`;
+      cls.push('span-day');
+      if (iso === sp.from) cls.push('span-first');
+      if (iso === sp.to) cls.push('span-last');
+      /* 시작일에만 기간 이름을 붙여 이 구간이 무엇인지 알 수 있게 한다 */
+      if (iso === sp.from) spanChip = `<div class="chip span">${sp.label}</div>`;
     });
 
-    let chips = '';
+    let chips = spanChip;
     if (off) chips += `<div class="chip off">${off} · 수업 없음</div>`;
     (EVENTS[iso] || []).forEach(([k,t]) => { chips += `<div class="chip ${k}">${t}</div>`; });
 
-    cells.push(`<div class="${cls.join(' ')}">${bar}
+    cells.push(`<div class="${cls.join(' ')}">
       <div class="dnum">${d}${isLesson ? '<i class="dot"></i>' : ''}</div>${chips}</div>`);
   }
   while (cells.length % 7) cells.push('<div class="cell out"></div>');
