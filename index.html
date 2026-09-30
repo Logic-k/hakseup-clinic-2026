@@ -117,6 +117,7 @@ section{margin-bottom:34px}
 }
 .dow.sun{color:var(--rest)}
 .cell{
+  position:relative;
   min-height:98px; padding:7px 8px 9px; border-right:1px solid var(--line); border-bottom:1px solid var(--line);
   display:flex; flex-direction:column; gap:4px;
 }
@@ -138,11 +139,23 @@ section{margin-bottom:34px}
 .chip.key{background:var(--brand-soft); border-left-color:var(--brand); color:var(--brand); font-weight:700}
 .chip.doc{background:var(--surface-2); border-left-color:var(--brand-2); color:var(--ink)}
 .chip.off{background:transparent; border-left-color:var(--rest); color:var(--rest); font-weight:500}
+.chip.dead{background:var(--accent-soft); border-left-color:var(--accent); color:var(--accent); font-weight:700}
+.chip.span{background:var(--brand-soft); border-left-color:var(--brand-2); color:var(--brand); font-weight:700}
+
+/* 기간 표시 바 (제출 기간 등) */
+.bar{
+  position:absolute; top:0; left:0; right:0; height:3px;
+  background:repeating-linear-gradient(90deg,var(--brand-2) 0 6px,transparent 6px 11px);
+  pointer-events:none;
+}
+.bar.start{left:0; right:auto; width:50%}
+.bar.end{right:0; left:auto; width:50%; background:repeating-linear-gradient(90deg,transparent 0 5px,var(--brand-2) 5px 11px)}
 
 /* ── legend ─────────────────────────────── */
 .legend{display:flex; gap:8px 18px; flex-wrap:wrap; margin-top:12px; font-size:12.5px; color:var(--ink-2)}
 .legend span{display:inline-flex; align-items:center; gap:6px}
 .sw{width:12px; height:12px; border-radius:4px; flex:0 0 auto}
+.sw.bar-legend{background:repeating-linear-gradient(90deg,var(--brand-2) 0 4px,transparent 4px 7px); border-radius:2px}
 
 /* ── guide panel ────────────────────────── */
 .panel{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:18px 20px}
@@ -390,8 +403,10 @@ footer b{color:var(--ink-2); font-weight:500}
     <div class="legend">
       <span><i class="sw" style="background:var(--brand)"></i>주요 일정</span>
       <span><i class="sw" style="background:var(--brand-2)"></i>안내·교재</span>
+      <span><i class="sw" style="background:var(--accent)"></i>제출 마감</span>
       <span><i class="sw" style="background:var(--rest)"></i>공휴일(수업 없음)</span>
       <span><i class="dot"></i>수업일</span>
+      <span><i class="sw bar-legend"></i>제출 기간</span>
     </div>
   </section>
 
@@ -401,9 +416,11 @@ footer b{color:var(--ink-2); font-weight:500}
       <p class="cap">학생별 수업 요일·시간은 소속 학교의 안내에 따라 진행됩니다.</p>
       <ul class="rlist">
         <li><span class="when">9/21(월)</span><span>2학기 수업 시작</span></li>
+        <li><span class="when">9/30(수)~10/8(목)</span><span>2차 진단계획서 · 하반기 지도계획서 제출 기간</span></li>
         <li><span class="when">9/24~25</span><span>추석 연휴 · 수업 없음</span></li>
         <li><span class="when">10/9(금)</span><span>한글날 · 수업 없음</span></li>
-        <li><span class="when">11/27(금)</span><span>2학기 수업 종료</span></li>
+        <li><span class="when">10/30(금)</span><span>9·10월 지도일지 제출 마감</span></li>
+        <li><span class="when">11/27(금)</span><span>2학기 수업 종료 · 11월 지도일지 제출 마감</span></li>
         <li><span class="when">문의</span><span>부산광역시서부교육지원청 서부기초학력지원센터 051-250-0560</span></li>
       </ul>
     </div>
@@ -663,8 +680,14 @@ const EVENTS = {
   [D(9,14)]: [['doc','수업 안내 및 교재 수령 시작 (~9/18)']],
   [D(9,18)]: [['doc','교재 수령 마감']],
   [D(9,21)]: [['key','2학기 학습클리닉 수업 시작']],
-  [D(11,27)]:[['key','2학기 학습클리닉 수업 종료']]
+  [D(10,30)]:[['dead','9·10월 지도일지 제출 마감']],
+  [D(11,27)]:[['key','2학기 학습클리닉 수업 종료'],['dead','11월 지도일지 제출 마감']]
 };
+
+/* 기간을 잇는 구간 (달력 위에 점선 바로 표시) */
+const SPANS = [
+  { from: D(9,30), to: D(10,8), label: '2차 진단계획서 · 하반기 지도계획서 제출 기간' }
+];
 
 /* ── D-day ─────────────────────────────── */
 const dd = (iso) => {
@@ -704,11 +727,21 @@ function month(m){
     if (off) cls.push('off'); else if (isLesson) cls.push('lesson');
     if (iso === todayISO) cls.push('today');
 
+    /* 기간 표시: 시작일은 왼쪽 반쪽, 끝일은 오른쪽 반쪽 점선을 그려 구간을 잇는다 */
+    let bar = '';
+    SPANS.forEach(sp => {
+      if (iso < sp.from || iso > sp.to) return;
+      const edge = (iso === sp.from ? ' start' : '') + (iso === sp.to ? ' end' : '');
+      if (iso !== sp.from || iso !== sp.to) bar = `<i class="bar${edge}"></i>`;
+      /* 시작일에만 기간 이름을 붙여 점선 구간이 무엇인지 알 수 있게 한다 */
+      if (iso === sp.from) bar += `<div class="chip span">${sp.label}</div>`;
+    });
+
     let chips = '';
     if (off) chips += `<div class="chip off">${off} · 수업 없음</div>`;
     (EVENTS[iso] || []).forEach(([k,t]) => { chips += `<div class="chip ${k}">${t}</div>`; });
 
-    cells.push(`<div class="${cls.join(' ')}">
+    cells.push(`<div class="${cls.join(' ')}">${bar}
       <div class="dnum">${d}${isLesson ? '<i class="dot"></i>' : ''}</div>${chips}</div>`);
   }
   while (cells.length % 7) cells.push('<div class="cell out"></div>');
