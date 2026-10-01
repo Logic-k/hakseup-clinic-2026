@@ -1,0 +1,735 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>다온 AI 튜터 — 무료로 쓰는 멘토 수업 도우미</title>
+<meta name="description" content="학습멘토를 위한 무료 AI 챗봇. 수업안·연습문제·정답 검산·자료 검색은 키 없이 바로 작동하고, 무료 AI API를 연결하면 대화형 답변까지 가능합니다.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@300;400;700&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFFAF1; --paper:#FFFFFF; --paper2:#FFF6E8;
+  --ink:#3D3833; --ink2:#7A7166; --line:#F0E4D3;
+  --mint:#2F9E8F; --mint-soft:#E2F4F0; --mint-line:#BCE3DC;
+  --peach:#E8833A; --peach-soft:#FFEEDD; --peach-line:#F5CFA8;
+  --lav:#8B6FC7; --lav-soft:#F0EAFE; --lav-line:#D8C9F5;
+  --rose:#E36B7F; --rose-soft:#FDECEF; --rose-line:#F3C3CD;
+  --sun:#FFF0BC;
+  --shadow:0 2px 0 rgba(61,56,51,.04), 0 10px 28px rgba(180,140,90,.10);
+  --r:18px;
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:"Gowun Dodum","Gaegu","Malgun Gothic",sans-serif; font-size:16px; line-height:1.7; -webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:"Gaegu","Gowun Dodum",sans-serif; font-weight:700; line-height:1.35; margin:0}
+.wrap{max-width:860px; margin:0 auto; padding:20px 14px 80px}
+button{font-family:inherit; cursor:pointer}
+a{color:var(--mint)}
+
+.hero{background:var(--paper); border:1.5px solid var(--line); border-radius:26px; box-shadow:var(--shadow); padding:26px 24px 20px; position:relative; overflow:hidden}
+.hero::before{content:""; position:absolute; top:0; left:0; right:0; height:9px; background:repeating-linear-gradient(90deg,var(--mint) 0 34px,var(--peach) 34px 68px,var(--lav) 68px 102px,var(--rose) 102px 136px); opacity:.75}
+.hero h1{font-size:30px}
+.hero .sub{color:var(--ink2); font-size:14.5px; margin-top:6px}
+.badges{display:flex; flex-wrap:wrap; gap:6px; margin-top:12px}
+.badge{font-size:12.5px; border-radius:999px; padding:2px 11px; border:1.5px solid var(--mint-line); background:var(--mint-soft); color:#1f7a6e}
+.badge.warn{border-color:var(--peach-line); background:var(--peach-soft); color:#a5551c}
+
+.modebar{display:flex; align-items:center; gap:10px; margin:14px 0; padding:10px 16px; background:var(--paper); border:1.5px solid var(--line); border-radius:14px; font-size:14px}
+.modebar .dot{width:10px; height:10px; border-radius:50%; background:#C9C2B6; flex:0 0 auto}
+.modebar.on .dot{background:var(--mint)}
+.modebar .grow{flex:1}
+.modebar button{border:1.5px solid var(--line); background:var(--paper); border-radius:10px; padding:5px 12px; font-size:13.5px; color:var(--ink2)}
+.modebar button:hover{border-color:var(--mint-line); color:var(--mint)}
+
+.tabs{display:flex; gap:8px; margin:6px 0 14px; flex-wrap:wrap}
+.tab{border:1.5px solid var(--line); background:var(--paper); border-radius:999px; padding:8px 18px; font-family:"Gaegu",sans-serif; font-size:16.5px; color:var(--ink2)}
+.tab.on{background:var(--mint); border-color:var(--mint); color:#fff}
+.tabpanel[hidden]{display:none}
+.card{background:var(--paper); border:1.5px solid var(--line); border-radius:var(--r); box-shadow:var(--shadow); padding:20px}
+
+/* ── 챗봇 ── */
+.chatlog{display:flex; flex-direction:column; gap:12px; min-height:280px; max-height:56vh; overflow-y:auto; padding:4px 2px}
+.msg{max-width:88%; padding:11px 15px; border-radius:16px; font-size:15px; white-space:pre-wrap; word-break:break-word}
+.msg.user{align-self:flex-end; background:var(--mint); color:#fff; border-bottom-right-radius:4px}
+.msg.bot{align-self:flex-start; background:var(--paper2); border:1.5px solid var(--line); border-bottom-left-radius:4px}
+.msg.bot.ai{background:var(--lav-soft); border-color:var(--lav-line)}
+.msg .tagline{font-size:11.5px; color:var(--ink2); margin-top:7px; padding-top:6px; border-top:1px dashed var(--line)}
+.srcs{display:flex; flex-wrap:wrap; gap:5px; margin-top:8px}
+.src{font-size:11.5px; background:var(--paper); border:1px solid var(--mint-line); color:#1f7a6e; border-radius:8px; padding:1px 8px; cursor:pointer}
+.src:hover{background:var(--mint-soft)}
+.chips{display:flex; flex-wrap:wrap; gap:7px; margin:10px 0}
+.chip{border:1.5px solid var(--peach-line); background:var(--peach-soft); border-radius:999px; padding:5px 13px; font-size:13.5px; color:#a5551c}
+.chip:hover{background:#ffe2c4}
+.composer{display:flex; gap:8px; margin-top:12px}
+.composer input{flex:1; border:1.5px solid var(--line); border-radius:12px; padding:11px 14px; font-size:15px; font-family:inherit; background:#fff}
+.composer input:focus{outline:2px solid var(--mint-line)}
+.composer button{border:0; background:var(--mint); color:#fff; border-radius:12px; padding:0 20px; font-family:"Gaegu",sans-serif; font-size:17px}
+.composer button:disabled{opacity:.5}
+.thinking{font-size:13.5px; color:var(--ink2); align-self:flex-start; padding:6px 14px}
+.thinking::after{content:""; animation:dots 1.2s infinite}
+@keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}
+
+.quiz{border:1px solid var(--lav-line); background:#fff; border-radius:12px; padding:10px 13px; margin-top:9px; font-size:14px}
+.quiz b{color:var(--lav)}
+details.ans{margin:5px 0 5px 12px; font-size:13.5px}
+details.ans summary{cursor:pointer; color:var(--mint); font-size:13px}
+details.ans div{padding:5px 0 0 2px; color:var(--ink2)}
+
+/* ── 수업안 폼 ── */
+.formgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-bottom:12px}
+.field label{display:block; font-size:13px; color:var(--ink2); margin-bottom:4px; font-family:"Gaegu",sans-serif; font-size:15.5px}
+.field select,.field input{width:100%; border:1.5px solid var(--line); border-radius:10px; padding:9px 11px; font-size:14.5px; font-family:inherit; background:#fff}
+.bigbtn{width:100%; border:0; background:var(--peach); color:#fff; border-radius:14px; padding:13px; font-family:"Gaegu",sans-serif; font-size:19px; margin-top:4px}
+.bigbtn:hover{background:#d0712b}
+.planout{margin-top:16px}
+.planout .phase{border-left:4px solid var(--mint); background:var(--paper2); border-radius:0 12px 12px 0; padding:10px 14px; margin:10px 0}
+.planout .phase b{font-family:"Gaegu",sans-serif; font-size:16.5px; color:#1f7a6e}
+.planout .min{font-size:12.5px; color:var(--peach); font-weight:700; margin-left:6px}
+.planout ul{margin:6px 0 0; padding-left:20px; font-size:14px}
+.warnbox{background:var(--rose-soft); border:1.5px solid var(--rose-line); border-radius:12px; padding:10px 14px; font-size:13px; color:#8a3a4a; margin-top:12px}
+.toolrow{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px}
+.toolrow button{border:1.5px solid var(--line); background:#fff; border-radius:10px; padding:7px 14px; font-size:13.5px; color:var(--ink2)}
+.toolrow button:hover{border-color:var(--mint); color:var(--mint)}
+
+/* ── AI 연결 ── */
+.provider{border:1.5px solid var(--line); border-radius:14px; padding:13px 15px; margin-bottom:10px; cursor:pointer; display:block}
+.provider:hover{border-color:var(--mint-line)}
+.provider.sel{border-color:var(--mint); background:var(--mint-soft)}
+.provider .pname{font-family:"Gaegu",sans-serif; font-size:17px}
+.provider .pdesc{font-size:12.5px; color:var(--ink2); margin-top:2px}
+.provider .free{display:inline-block; font-size:11.5px; background:var(--sun); border-radius:999px; padding:1px 9px; margin-top:5px; color:#7a5c00}
+.provider .free.paid{background:var(--rose-soft); color:#8a3a4a}
+.keyrow{display:flex; gap:8px; margin:10px 0}
+.keyrow input{flex:1; border:1.5px solid var(--line); border-radius:10px; padding:10px 12px; font-size:13.5px; font-family:monospace}
+.small{font-size:12.5px; color:var(--ink2)}
+.status{font-size:13.5px; padding:8px 12px; border-radius:10px; margin-top:8px; display:none}
+.status.ok{display:block; background:var(--mint-soft); color:#1f7a6e}
+.status.err{display:block; background:var(--rose-soft); color:#8a3a4a}
+@media(max-width:560px){.msg{max-width:96%}.hero h1{font-size:25px}}
+@media print{.tabs,.composer,.chips,.modebar,.toolrow,.keyrow{display:none}.card{box-shadow:none;border-color:#ccc}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <h1>🦆 다온 AI 튜터</h1>
+    <p class="sub">찾아가는 학습클리닉 멘토를 위한 무료 수업 도우미 — 수업안·연습문제·정답 검산은 지금 바로, 대화형 AI는 무료 API 키를 연결하면 더 똑똑해져요.</p>
+    <div class="badges">
+      <span class="badge">키 없이도 기본 기능 전부 작동</span>
+      <span class="badge">대화 내용 서버 저장 없음</span>
+      <span class="badge warn">직접 작성한 시연 자료 · 공식 교과서 아님</span>
+    </div>
+  </header>
+
+  <div class="modebar" id="modebar">
+    <span class="dot"></span>
+    <span id="modetext">로컬 모드 — 자료 검색·템플릿·정확 계산</span>
+    <span class="grow"></span>
+    <button id="modeToggle" type="button">AI 답변 끄는 중</button>
+  </div>
+
+  <nav class="tabs">
+    <button class="tab on" data-tab="chat">💬 챗봇</button>
+    <button class="tab" data-tab="plan">📝 수업안 만들기</button>
+    <button class="tab" data-tab="connect">🔑 무료 AI 연결</button>
+    <button class="tab" data-tab="help">❓ 이렇게 쓰세요</button>
+  </nav>
+
+  <!-- ═══ 챗봇 ═══ -->
+  <section class="tabpanel" id="tab-chat">
+    <div class="card">
+      <div class="chatlog" id="chatlog"></div>
+      <div class="chips" id="chips"></div>
+      <form class="composer" id="composer">
+        <input id="ask" autocomplete="off" maxlength="300" placeholder="예: 3/4+1/8 계산해 줘 · 4학년 나눗셈 수업안 · 분모와 분자 설명">
+        <button type="submit" id="sendBtn">보내기</button>
+      </form>
+      <p class="small" style="margin-top:8px">이름·연락처 등 학생 개인정보는 입력하지 마세요. AI 연결 시 질문이 해당 외부 서비스로 전송됩니다.</p>
+    </div>
+  </section>
+
+  <!-- ═══ 수업안 ═══ -->
+  <section class="tabpanel" id="tab-plan" hidden>
+    <div class="card">
+      <div class="formgrid">
+        <div class="field"><label>학년</label>
+          <select id="pGrade"><option>3</option><option>4</option><option>5</option></select></div>
+        <div class="field"><label>주제</label>
+          <select id="pTopic"></select></div>
+        <div class="field"><label>수업 시간</label>
+          <select id="pMin"><option>20</option><option selected>40</option><option>60</option></select></div>
+      </div>
+      <div class="field"><label>지도 목표 메모 (선택 · 개인정보 금지)</label>
+        <input id="pGoal" maxlength="300" placeholder="예: 받아내림이 있는 뺄셈을 천천히 연습"></div>
+      <button class="bigbtn" id="planBtn" type="button">수업안 만들기</button>
+      <div class="planout" id="planOut"></div>
+    </div>
+  </section>
+
+  <!-- ═══ AI 연결 ═══ -->
+  <section class="tabpanel" id="tab-connect" hidden>
+    <div class="card">
+      <h2 style="font-size:21px">무료·저렴 AI 연결하기</h2>
+      <p class="small" style="margin:6px 0 14px">아래 중 하나를 골라 무료로 발급받은 API 키를 붙여 넣으면 챗봇이 생성형 AI로 답합니다. 키는 <b>이 브라우저에만</b> 저장되며 어디에도 업로드되지 않습니다. 한도·가격은 각 서비스 정책에 따라 바뀔 수 있습니다.</p>
+      <div id="providers"></div>
+      <div class="field"><label>API 키 <span class="small" id="keyHelp"></span></label>
+        <div class="keyrow">
+          <input id="apiKey" type="password" placeholder="API 키를 붙여 넣으세요" autocomplete="off">
+          <button id="keySave" type="button" style="border:0;background:var(--mint);color:#fff;border-radius:10px;padding:0 16px">저장</button>
+        </div></div>
+      <div class="field"><label>모델 (자동 입력됨 · 바꿀 수 있음)</label>
+        <input id="apiModel" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:9px 11px;font-size:13.5px;font-family:monospace"></div>
+      <div class="toolrow">
+        <button id="testBtn" type="button">연결 테스트</button>
+        <button id="keyDel" type="button">키 삭제</button>
+        <a href="ai-guide.html" target="_blank" style="align-self:center;font-size:13px">📖 발급 방법·서비스 비교 가이드 열기</a>
+      </div>
+      <div class="status" id="connStatus"></div>
+      <div class="warnbox">학생 이름·학교·연락처·진단 결과는 어떤 AI 서비스에도 보내지 마세요. 무료 티어는 서비스에 따라 입력이 모델 학습에 쓰일 수 있습니다 — 수업 자료 수준의 일반 질문만 보내는 것이 안전합니다.</div>
+    </div>
+  </section>
+
+  <!-- ═══ 사용법 ═══ -->
+  <section class="tabpanel" id="tab-help" hidden>
+    <div class="card">
+      <h2 style="font-size:21px">무엇을 할 수 있나요</h2>
+      <ul style="font-size:14.5px; padding-left:20px; line-height:2">
+        <li><b>계산·검산</b> — <code>487+268</code>, <code>85÷4</code>, <code>3/4+1/8</code> 처럼 입력하면 브라우저 안의 정확 계산기가 분수·몫·나머지까지 답합니다. AI가 아니라 확정된 계산이라 틀리지 않아요.</li>
+        <li><b>수업안·연습문제</b> — 학년·주제·시간을 고르면 도입–탐구–연습–정리 흐름과 문제 3개, 정답·해설·출처를 만듭니다.</li>
+        <li><b>자료 검색</b> — "분모와 분자 뜻" 같은 질문에 직접 작성한 지도 자료 21개 조각에서 근거를 찾아 답합니다. 자료에 없는 건 없다고 말합니다.</li>
+        <li><b>AI 대화(선택)</b> — 무료 API를 연결하면 찾은 자료를 근거로 AI가 자연스럽게 풀어 설명합니다. 출처 없는 설명은 AI가 아니라 자료 기반으로만 답하도록 제한했습니다.</li>
+      </ul>
+      <h2 style="font-size:21px; margin-top:18px">정직하게 알려드리는 한계</h2>
+      <ul style="font-size:14.5px; padding-left:20px; line-height:2">
+        <li>자료는 이 페이지 안의 직접 작성 시연 자료뿐입니다. 교과서 쪽수, 동영상 링크, 다른 학교 기록 같은 건 물어봐도 없다고 답합니다.</li>
+        <li>무료 AI는 하루 사용 한도가 있습니다. 한도가 차면 자동으로 로컬 모드 답변으로 돌아갑니다.</li>
+        <li>AI 답변은 미검증 초안입니다. 수업 전에 개념·수치·난이도를 멘토가 직접 확인하세요.</li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+<script>
+"use strict";
+/* ═══════════════════ 1. 정확 계산 엔진 (Fraction · eval 없음) ═══════════════════ */
+const babs = x => x < 0n ? -x : x;
+const bgcd = (a,b) => b === 0n ? a : bgcd(b, a % b);
+const bitlen = v => babs(v).toString(2).length;
+class Frac {
+  constructor(n, d = 1n){ if (d === 0n) throw new MErr("0으로 나눌 수 없어요"); if (d < 0n){ n = -n; d = -d; } const g = bgcd(babs(n), d); this.n = n / g; this.d = d / g; }
+  add(o){ return new Frac(this.n * o.d + o.n * this.d, this.d * o.d); }
+  sub(o){ return new Frac(this.n * o.d - o.n * this.d, this.d * o.d); }
+  mul(o){ return new Frac(this.n * o.n, this.d * o.d); }
+  div(o){ if (o.n === 0n) throw new MErr("0으로 나눌 수 없어요"); return new Frac(this.n * o.d, this.d * o.n); }
+  toStr(){ return this.d === 1n ? this.n.toString() : `${this.n}/${this.d}`; }
+}
+class MErr extends Error {}
+const MMAX = { len:128, tok:64, dig:12, dep:8, bits:256 };
+function bound(f){ if (bitlen(f.n) > MMAX.bits || bitlen(f.d) > MMAX.bits) throw new MErr("결과가 너무 커요"); return f; }
+function parseExact(src){
+  if (typeof src !== "string" || !src.trim()) throw new MErr("빈 식이에요");
+  if (src.length > MMAX.len) throw new MErr("식이 너무 길어요");
+  const s = src.replace(/×/g,"*").replace(/÷/g,"/").replace(/[＋－]/g,m=>m==="＋"?"+":"-");
+  const toks = []; let i = 0;
+  while (i < s.length){
+    if (/\s/.test(s[i])) { i++; continue; }
+    const m = s.slice(i).match(/^\d+(?:\.\d+)?/);
+    if (m){ if (m[0].replace(".","").length > MMAX.dig) throw new MErr("자릿수가 너무 커요"); toks.push(["n",m[0]]); i += m[0].length; }
+    else if ("+-*/()".includes(s[i])){ toks.push([s[i], s[i]]); i++; }
+    else throw new MErr("지원하지 않는 기호예요");
+    if (toks.length > MMAX.tok) throw new MErr("식이 너무 복잡해요");
+  }
+  toks.push(["end",""]);
+  let p = 0;
+  const cur = () => toks[p];
+  const take = k => { if (cur()[0] !== k) throw new MErr("식이 이상해요"); return toks[p++]; };
+  const frac = str => { const [a,b] = str.split("."); if (!b) return new Frac(BigInt(a)); return new Frac(BigInt(a + b), 10n ** BigInt(b.length)); };
+  function expr(dep){ let v = term(dep); while (cur()[0] === "+" || cur()[0] === "-"){ const op = toks[p++][0]; const r = term(dep); v = bound(op === "+" ? v.add(r) : v.sub(r)); } return v; }
+  function term(dep){ let v = fac(dep); while (cur()[0] === "*" || cur()[0] === "/"){ const op = toks[p++][0]; const r = fac(dep); v = bound(op === "*" ? v.mul(r) : v.div(r)); } return v; }
+  function fac(dep){ if (dep > MMAX.dep) throw new MErr("괄호가 너무 깊어요");
+    if (cur()[0] === "+" || cur()[0] === "-"){ const op = toks[p++][0]; const v = fac(dep); return op === "+" ? v : bound(new Frac(-v.n, v.d)); }
+    if (cur()[0] === "n") return bound(frac(take("n")[1]));
+    if (cur()[0] === "("){ p++; const v = expr(dep + 1); take(")"); return v; }
+    throw new MErr("숫자가 필요해요");
+  }
+  const r = expr(0);
+  if (cur()[0] !== "end") throw new MErr("뒷부분을 이해 못 했어요");
+  return r;
+}
+const isInt = f => f.d === 1n;
+function divParts(a, b){ // 양의 정수 몫·나머지
+  const q = a / b, r = a % b; return { q, r };
+}
+
+/* ═══════════════════ 2. 자료(코퍼스) — 직접 작성 시연 자료 ═══════════════════ */
+const AUTHOR = "다온 튜터 제작 · 직접 작성 예시";
+const DISCLAIMER = "직접 작성한 시연 자료입니다. 교육부·교육청 공식 교육과정이나 검정 교과서가 아닙니다.";
+const TOPICS = [
+  { id:"fractions", title:"분수의 의미", desc:"같게 나눈 부분과 전체의 관계" },
+  { id:"addition", title:"덧셈과 자리값", desc:"자리값을 맞추고 받아올림 이해" },
+  { id:"subtraction", title:"뺄셈과 받아내림", desc:"모자란 자리에서 수를 바꾸어 계산" },
+  { id:"multiplication", title:"곱셈과 묶음", desc:"같은 크기 묶음을 곱셈으로" },
+  { id:"division", title:"나눗셈과 나머지", desc:"똑같이 나누고 남는 수 확인" },
+  { id:"reading", title:"읽기·어휘 지도", desc:"소리 내어 읽기와 어휘 연결" },
+  { id:"mentoring", title:"멘토링 기본", desc:"첫 만남·관계·안전 수칙" },
+];
+const CONTENT = {
+ fractions:[
+  ["concept","전체와 부분","분수는 전체를 크기가 같은 부분으로 나누었을 때 그중 몇 부분인지 나타내는 수다. 분모는 전체를 같게 나눈 부분의 수, 분자는 선택한 부분의 수다. 종이 한 장을 같은 크기로 8등분하고 3부분을 칠하면 전체의 3/8이다. 서로 다른 크기로 나누면 조각 수만 세어 분수를 정할 수 없다."],
+  ["activity","종이 띠로 분수 만들기","같은 길이의 종이 띠를 접어 크기가 같은 부분을 만든다. 4등분한 띠에서 1부분, 8등분한 띠에서 2부분을 칠해 겹치면 1/4과 2/8의 크기가 같다. 분수를 비교할 때에는 먼저 전체의 크기가 같은지 확인한다. 분모가 같은 분수에서는 분자가 클수록 선택한 부분이 많다."],
+  ["practice","분수 문제와 설명 확인","전체를 8등분한 그림에서 3부분을 칠했을 때 분수는 3/8이며 칠하지 않은 부분은 5/8이다. 8부분 중 3부분을 골랐다는 말로 설명하게 한다. 분모가 8로 같을 때 5/8은 3/8보다 크다. 확인 질문: 전체가 같은가? 같은 크기로 나누었는가? 분모와 분자가 각각 무엇을 뜻하는가?"]],
+ addition:[
+  ["concept","자리값과 받아올림","덧셈은 두 양을 합쳐 전체를 구하는 계산이다. 세로셈에서는 일의 자리끼리, 십의 자리끼리처럼 같은 자리값을 맞춘다. 같은 자리의 합이 10 이상이면 10개를 그다음 자리의 1개로 바꾼다. 이것이 받아올림이다. 146+78은 224이다."],
+  ["activity","수 모형으로 합 만들기","일의 자리 막대 10개를 십의 자리 묶음 1개로 바꾸어 본다. 146에 78을 더하면 일의 자리 6+8=14에서 4를 쓰고 십의 자리로 1을 올린다. 십의 자리 4+7+1=12에서 2를 쓰고 백의 자리로 1을 올려 합이 224가 된다."],
+  ["practice","어림과 역산으로 확인","합을 구하기 전 각 수를 가까운 십 또는 백으로 어림하여 결과 범위를 예상한다. 146+78=224를 확인하려면 224-78=146을 계산한다. 예상한 범위와 실제 결과가 크게 다르면 자리 맞춤이나 받아올림을 다시 확인한다. 정답뿐 아니라 계산 과정을 말로 설명한다."]],
+ subtraction:[
+  ["concept","차와 받아내림","뺄셈은 덜어 낸 뒤 남는 양 또는 두 양의 차를 구한다. 같은 자리값끼리 계산한다. 빼야 할 수가 더 크면 바로 위 자리의 1을 현재 자리의 10으로 바꾼다. 302-178은 124이다. 0이 있는 자리에서는 먼저 더 높은 자리에서 차례대로 바꾸어야 한다."],
+  ["activity","묶음 바꾸기","302를 백 모형 3개와 일 모형 2개로 나타낸다. 백 모형 하나를 십 모형 10개로 바꾸고 그중 십 모형 하나를 일 모형 10개로 바꾸면 백 2개, 십 9개, 일 12개가 된다. 여기서 178을 빼면 백 1개, 십 2개, 일 4개가 남는다."],
+  ["practice","덧셈으로 뺄셈 검산","302-178=124의 검산은 124+178=302이다. 차에 뺀 수를 더해 처음 수가 되는지 확인한다. 자릿수가 다른 수를 세로로 쓸 때도 오른쪽 일의 자리를 맞춘다. 0을 지나는 받아내림에서 바뀐 십의 자리 값을 빠뜨리지 않도록 확인한다."]],
+ multiplication:[
+  ["concept","같은 묶음의 반복","곱셈은 같은 크기의 묶음이 여러 개일 때 전체를 구하는 계산이다. 한 묶음에 6개씩 있고 묶음이 4개라면 6×4=24이다. 이를 6+6+6+6과 연결한다. 배열의 행과 열을 바꾸어 보며 6×4와 4×6의 결과가 같음을 확인할 수 있다."],
+  ["activity","배열과 분배","바둑돌을 직사각형 배열로 놓아 같은 묶음을 보이게 한다. 12×4는 10×4와 2×4로 나누어 40+8=48로 구할 수 있다. 두 자리 수의 곱셈에서도 수를 자리값대로 나눈 뒤 부분의 곱을 더한다. 배열을 두 부분으로 나누어 계산 과정과 연결한다."],
+  ["practice","곱셈을 말과 식으로","한 봉지에 6개씩 든 물건을 4봉지 준비하면 모두 24개다. 한 묶음의 수와 묶음 수가 무엇인지 말하게 한다. 12×4=48의 답은 48÷4=12로 확인할 수 있다. 곱셈식만 외우기보다 그림과 반복 덧셈, 나눗셈을 연결한다."]],
+ division:[
+  ["concept","똑같이 나누기","나눗셈은 같은 수씩 나누어 주거나 같은 크기의 묶음으로 나누는 계산이다. 24개를 6곳에 똑같이 나누면 한 곳에 4개씩이다. 24개를 6개씩 묶으면 4묶음이다. 같은 식 24÷6=4라도 문제에서 묻는 양이 무엇인지 확인한다."],
+  ["activity","나머지 직접 세기","물건 26개를 6개씩 묶으면 4묶음이 되고 2개가 남는다. 26÷6의 몫은 4, 나머지는 2다. 나머지는 나누는 수보다 작아야 한다. 남은 것이 6개 이상이면 한 묶음을 더 만들 수 있기 때문이다. 묶음 그림으로 몫과 나머지를 구별한다."],
+  ["practice","곱셈과 덧셈으로 검산","나눗셈은 나누는 수×몫+나머지=나누어지는 수로 검산한다. 26÷6에서 6×4+2=26이다. 나머지가 나누는 수보다 작고 0 이상인지도 확인한다. 남은 물건을 더 나누어도 되는지는 문제의 상황과 단위를 확인한 후 판단한다."]],
+ reading:[
+  ["concept","소리 내어 읽기와 유창성","읽기 지도의 시작은 아이가 소리 내어 읽는 것을 듣는 것이다. 모르는 낱말에서 멈추는 곳, 되돌아 읽는 곳을 표시해 두면 도움이 필요한 부분이 보인다. 짧은 문장부터 정확하게 읽고, 익숙해지면 속도보다 끊어 읽는 위치와 억양을 함께 봐 준다."],
+  ["activity","낱말 카드와 문장 찾기","글에 나온 낱말 중 어려운 것 3~5개를 카드로 만들어 뜻을 함께 짐작해 본다. 낱말을 문맥 속에서 다시 찾아 읽어 보면 단어 암기가 아니라 이해와 연결된다. 모르는 낱말을 추측한 근거를 말로 설명하게 한다."],
+  ["practice","읽은 것을 내 말로","한 단락을 읽고 '누가 · 무엇을 · 어떻게' 세 가지를 자기 말로 말하게 한다. 내용을 그대로 외우기보다 순서를 바꾸어 설명해 보는 것이 이해 확인에 좋다. 틀린 부분은 책의 해당 문장을 다시 찾아 함께 읽으며 바로잡는다."]],
+ mentoring:[
+  ["concept","첫 만남과 관계 형성","첫 수업은 진도보다 관계가 먼저다. 아이가 좋아하는 것, 학교생활, 요즘 재미있는 일을 묻고 고르게 들어 준다. 잘하는 것 하나를 찾아 구체적으로 칭찬한다. 앞으로의 약속(시간, 자리, 연락 방법)을 함께 정해 두면 다음 만남이 편해진다."],
+  ["activity","학습부진 학생과의 대화","틀린 답을 지적하기보다 '어떻게 생각했는지' 물어본다. 아이가 말한 과정 속 맞는 부분을 먼저 짚어 준 뒤 어긋난 한 곳만 다시 본다. '모르겠어요'가 나오면 문제를 더 작은 질문으로 나눈다. 속도보다 아이가 스스로 해냈다는 경험을 쌓는 것이 목표다."],
+  ["practice","개인정보·안전 수칙","학생의 이름·연락처·주소·진단 결과를 개인 기기나 외부 서비스에 기록·입력하지 않는다. 수업 기록은 정해진 양식과 절차로만 남긴다. 아이가 보낸 사진·메시지를 개인 계정에 보관하지 않고, 훈육이나 신체 접촉은 하지 않는다. 의심되는 안전 문제는 담당 교사·센터에 바로 알린다."]],
+};
+const DOCUMENTS = [];
+for (const t of TOPICS){
+  DOCUMENTS.push({
+    document_id:`DEMO-${t.id.toUpperCase()}-001`, title:`${t.title} · 자체 작성 활동 자료`,
+    topic:t.id, grade:"3~5학년 시연용", author:AUTHOR, disclaimer:DISCLAIMER,
+    chunks: CONTENT[t.id].map(([sec, head, text], i) => ({ chunk_id:`DEMO-${t.id.toUpperCase()}-${String(i+1).padStart(2,"0")}`, section:sec, heading:head, text })),
+  });
+}
+const ALL_CHUNKS = DOCUMENTS.flatMap(d => d.chunks.map(c => ({...c, document_id:d.document_id, docTitle:d.title, topic:d.topic})));
+
+/* ═══════════════════ 3. 한국어 bigram TF-IDF 검색 ═══════════════════ */
+function tokensOf(text){
+  const words = (text.toLowerCase().match(/[가-힣a-z0-9]+/g) || []);
+  const out = {};
+  for (const w of words){ out[w] = (out[w]||0) + 1; for (let i = 0; i < w.length - 1; i++){ const b = w[i]+w[i+1]; out[b] = (out[b]||0) + 1; } }
+  return out;
+}
+const VECTORS = ALL_CHUNKS.map(c => tokensOf(`${c.text} ${c.docTitle} ${c.heading}`));
+const IDF = {};
+{
+  const df = {};
+  for (const v of VECTORS) for (const t in v) df[t] = (df[t]||0) + 1;
+  for (const t in df) IDF[t] = Math.log(1 + ALL_CHUNKS.length / (1 + df[t]));
+}
+function search(query, topic = null, limit = 4){
+  const qt = tokensOf(query);
+  const rows = [];
+  for (let i = 0; i < ALL_CHUNKS.length; i++){
+    const c = ALL_CHUNKS[i]; if (topic && c.topic !== topic) continue;
+    const v = VECTORS[i];
+    if (!Object.keys(qt).length){ rows.push({ c, score:1 }); continue; }
+    let num = 0, hit = false;
+    for (const t in qt) if (v[t]){ hit = true; num += qt[t] * v[t] * (IDF[t] ?? 1) ** 2; }
+    if (!hit) continue;
+    let dq = 0, dv = 0;
+    for (const t in qt) dq += (qt[t] * (IDF[t] ?? 1)) ** 2;
+    for (const t in v) dv += (v[t] * IDF[t]) ** 2;
+    const score = (dq && dv) ? num / Math.sqrt(dq * dv) : 0;
+    if (score >= 0.035) rows.push({ c, score: Math.round(score * 1e4) / 1e4 });
+  }
+  return rows.sort((a,b) => b.score - a.score || a.c.chunk_id.localeCompare(b.c.chunk_id)).slice(0, limit);
+}
+
+/* ═══════════════════ 4. 수업 생성기 (결정적 · 정답은 계산기로 검증) ═══════════════════ */
+const TOPIC_KW = { fractions:["분수","분모","분자","통분"], addition:["덧셈","더하기","받아올림","자리값"], subtraction:["뺄셈","빼기","받아내림"], multiplication:["곱셈","곱하기","구구","배열"], division:["나눗셈","나누기","나머지","몫"], reading:["읽기","낭독","어휘","낱말","독해","글 읽"], mentoring:["멘토","첫만남","첫 만남","개인정보","안전","칭찬","관계","수칙"] };
+function detectTopic(text){
+  const excl = /(\S+)\s*(?:말고|빼고|제외하고?|아니고|대신)/g; let m; const excluded = new Set();
+  while ((m = excl.exec(text))) for (const [id,kws] of Object.entries(TOPIC_KW)) if (kws.some(k => m[1].includes(k))) excluded.add(id);
+  for (const [id,kws] of Object.entries(TOPIC_KW)) if (!excluded.has(id) && kws.some(k => text.includes(k))) return { topic:id, excluded:[...excluded] };
+  return { topic:null, excluded:[...excluded] };
+}
+const GRADE_NO = /([345])\s*학년/;
+const MIN_NO = /(20|40|60)\s*분/;
+function makeQuiz(topic, grade){
+  const item = (i, q, a, ex) => ({ id:`q${i}`, q, a:String(a), ex });
+  if (topic === "fractions"){
+    const d = {3:8, 4:10, 5:12}[grade], n = {3:3, 4:3, 5:5}[grade];
+    return [
+      item(1, `종이 한 장을 같은 크기로 ${d}등분하고 ${n}부분을 칠했습니다. 칠한 부분은 전체의 얼마인가요?`, `${n}/${d}`, `전체를 나눈 수 ${d}가 분모, 칠한 부분 수 ${n}가 분자입니다.`),
+      item(2, `같은 종이에서 칠하지 않은 부분은 전체의 얼마인가요?`, `${d-n}/${d}`, `전체 ${d}부분에서 칠한 ${n}부분을 빼면 ${d-n}부분입니다.`),
+      item(3, `크기가 같은 전체에서 ${n}/${d}와 ${n+2}/${d} 중 더 큰 분수를 고르세요.`, `${n+2}/${d}`, `분모가 같으면 분자가 큰 분수가 큽니다.`)];
+  }
+  if (topic === "addition"){
+    const [a,b] = {3:[146,78],4:[1468,757],5:[12468,7757]}[grade];
+    return [
+      item(1, `${a} + ${b} = ?`, a+b, `같은 자리끼리 더하고 10 이상이면 받아올림합니다.`),
+      item(2, `${a+b}에서 ${b}를 빼면 얼마인가요? 덧셈 검산과 연결해 보세요.`, a, `${a+b} - ${b} = ${a}입니다.`),
+      item(3, `도서 ${a}권에 ${b}권을 더하고 다시 10권을 더했습니다. 모두 몇 권인가요?`, `${a+b+10}권`, `${a} + ${b} + 10 = ${a+b+10}입니다.`)];
+  }
+  if (topic === "subtraction"){
+    const [a,b] = {3:[302,178],4:[2003,786],5:[12003,6786]}[grade];
+    return [
+      item(1, `${a} - ${b} = ?`, a-b, `자리를 맞춘 뒤 필요한 자리에서 받아내림합니다.`),
+      item(2, `${a-b} + ${b} = ? 뺄셈의 답을 확인해 보세요.`, a, `차에 뺀 수를 더하면 처음 수 ${a}가 됩니다.`),
+      item(3, `색종이 ${a}장 중 ${b}장을 쓰고 10장을 더 썼습니다. 몇 장이 남나요?`, `${a-b-10}장`, `${a} - ${b} - 10 = ${a-b-10}입니다.`)];
+  }
+  if (topic === "multiplication"){
+    const [a,b] = {3:[6,4],4:[12,4],5:[24,6]}[grade];
+    return [
+      item(1, `한 봉지에 ${a}개씩 든 블록이 ${b}봉지 있습니다. 모두 몇 개인가요?`, `${a*b}개`, `${a}개씩 ${b}묶음이므로 ${a} × ${b} = ${a*b}입니다.`),
+      item(2, `${a} × ${b+1} = ?`, a*(b+1), `${a} × ${b} = ${a*b}에 한 묶음 ${a}를 더하면 ${a*(b+1)}입니다.`),
+      item(3, `${a*b} ÷ ${b} = ? 곱셈과 연결해 보세요.`, a, `${a} × ${b} = ${a*b}이므로 ${a*b} ÷ ${b} = ${a}입니다.`)];
+  }
+  if (topic === "division"){
+    const [a,b] = {3:[26,6],4:[53,7],5:[149,12]}[grade];
+    const { q, r } = divParts(BigInt(a), BigInt(b));
+    return [
+      item(1, `블록 ${a}개를 ${b}개씩 묶습니다. 몇 묶음이고 몇 개가 남나요?`, `몫 ${q}, 나머지 ${r}`, `${b} × ${q} = ${b*Number(q)}이고 ${a} - ${b*Number(q)} = ${r}. 나머지는 나누는 수보다 작습니다.`),
+      item(2, `${b} × ${q} + ${r} = ? 나눗셈의 답을 확인해 보세요.`, a, `나누는 수 × 몫 + 나머지 = 처음 수이므로 ${a}입니다.`),
+      item(3, `블록 ${b*Number(q)}개를 ${b}개씩 묶으면 몇 묶음이고 몇 개가 남나요?`, `몫 ${q}, 나머지 0`, `${b} × ${q} = ${b*Number(q)}이므로 남는 것 없이 ${q}묶음입니다.`)];
+  }
+  if (topic === "reading"){
+    return [
+      item(1, `짧은 글을 소리 내어 읽고, 멈추거나 되돌아 읽은 곳을 스스로 표시해 보세요.`, `(표시 확인)`, `멈춘 곳이 도움이 필요한 낱말·어구입니다. 그 부분만 다시 같이 읽어 보세요.`),
+      item(2, `글에서 모르는 낱말 3개를 골라 문맥으로 뜻을 짐작하고, 짐작한 근거를 말해 보세요.`, `(근거 설명)`, `뜻을 가르치기보다 어떻게 알았는지 말하게 하는 것이 핵심입니다.`),
+      item(3, `읽은 단락을 '누가 · 무엇을 · 어떻게' 순서로 자기 말로 설명해 보세요.`, `(세 요소 포함)`, `빠진 요소가 있으면 해당 문장을 다시 찾아 함께 읽습니다.`)];
+  }
+  return [
+    item(1, `첫 만남에서 아이에게 물어볼 '좋아하는 것' 질문을 2개 적어 보세요.`, `(멘토 답)`, `관계 형성이 진도보다 먼저입니다.`),
+    item(2, `아이가 "모르겠어요"라고 할 때 멘토의 다음 말로 좋은 것은? ① 답을 알려준다 ② 문제를 더 작은 질문으로 나눈다`, `②`, `스스로 해낸 경험을 쌓는 것이 목표입니다.`),
+    item(3, `수업 중 알게 된 학생의 연락처를 내 휴대폰에 저장해도 되나요?`, `아니요`, `개인정보는 정해진 양식·절차로만 다룹니다.`)];
+}
+function makePlan(grade, topic, minutes, goal){
+  const meta = TOPICS.find(t => t.id === topic);
+  const srcs = search("", topic, 3);
+  const bySec = Object.fromEntries(srcs.map(s => [s.c.section, s.c]));
+  const mm = {20:[3,6,8,3], 40:[5,12,18,5], 60:[8,18,26,8]}[minutes];
+  const inst = {
+    fractions:["종이 한 장을 같은 크기로 나눈 경우와 서로 다르게 나눈 경우를 비교해 주세요.","분모와 분자를 각각 전체를 나눈 수, 고른 부분의 수와 연결해 말해 주세요."],
+    addition:["수 모형을 자리값별로 놓고 같은 자리끼리 합쳐 주세요.","일 모형 10개가 십 모형 1개로 바뀌는 순간을 세로셈의 받아올림과 연결해 주세요."],
+    subtraction:["수 모형으로 처음 수를 만들고 빼야 할 수를 덜어 내 보세요.","0을 지나는 받아내림은 한 단계씩 묶음을 바꾸며 설명해 주세요."],
+    multiplication:["같은 수의 블록 묶음을 여러 개 만들고 반복 덧셈을 써 보세요.","반복 덧셈을 곱셈식과 연결하고 배열을 나누어 계산하는 방법도 보여 주세요."],
+    division:["블록을 같은 수씩 묶으며 묶음 수와 남은 블록을 구별해 주세요.","나머지가 나누는 수보다 작아야 하는 이유를 실제 묶음으로 확인해 주세요."],
+    reading:["짧은 글을 골라 아이가 소리 내어 읽는 것을 끝까지 들어 주세요.","멈춘 낱말을 표시하고 문맥으로 뜻을 짐작하게 해 주세요."],
+    mentoring:["좋아하는 것·요즘 재미있는 일을 묻고 끝까지 들어 주세요.","함께 지킬 약속 2~3개를 아이와 같이 정해 보세요."],
+  }[topic];
+  return {
+    title:`${meta.title}, 함께 설명하는 ${minutes}분`, topic, grade, minutes, goal,
+    objectives:[`${meta.title}의 핵심을 구체물·말로 설명할 수 있어요.`,`연습문제의 답을 구하고 풀이·검산 방법을 말할 수 있어요.`],
+    materials:["종이 띠 또는 수 모형","필기구","연습문제 3개"],
+    steps:[
+      { phase:"도입", min:mm[0], name:"생각 열기", list:["오늘 주제에 맞는 자료를 보여 주고 무엇을 알 수 있는지 말하게 해 주세요.","계산 속도보다 생각한 방법을 듣는 데 집중해 주세요."], src:[bySec.concept?.chunk_id] },
+      { phase:"탐구", min:mm[1], name:"손으로 해 보고 설명하기", list:[...inst, bySec.activity?.text || ""], src:[bySec.concept?.chunk_id, bySec.activity?.chunk_id] },
+      { phase:"연습", min:mm[2], name:"세 문제로 이해 확인", list:["문제를 한 문제씩 제시하고 답보다 풀이 방법을 먼저 물어봐 주세요.","막히면 관련 자료의 그림·묶음·자리값 설명으로 돌아가 주세요."], src:[bySec.practice?.chunk_id] },
+      { phase:"정리", min:mm[3], name:"한 문장으로 되짚기", list:["오늘 쓴 수학 용어 하나를 골라 자신의 말로 설명하게 해 주세요.","다음 수업에서 다시 볼 개념만 개인 기록 없이 구두로 정리해 주세요."], src:[bySec.practice?.chunk_id] },
+    ],
+    quiz: makeQuiz(topic, grade),
+    sources: srcs.map(s => s.c),
+    checklist:["개념·계산·정답과 해설을 직접 확인했나요?","수업 대상에 맞는 난이도·표현인지 확인했나요?","학생의 이름·연락처·개인 기록을 넣지 않았나요?","공식 교육과정·교과서와의 일치는 별도로 검토했나요?"],
+    warnings:[DISCLAIMER, "성인 멘토가 검토하고 수정한 뒤 사용하세요. 자동 진단·평가 결과가 아닙니다."],
+  };
+}
+
+/* ═══════════════════ 5. 무료·저렴 AI 제공자 ═══════════════════ */
+const PROVIDERS = {
+  gemini:    { name:"Google Gemini", tag:"무료 티어", type:"gemini", model:"gemini-2.5-flash-lite",
+               free:"무료 · 분당 ~15회 · 하루 ~1,000회", help:"aistudio.google.com → 'API 키 가져오기' (구글 계정, 카드 불필요)", link:"https://aistudio.google.com/apikey" },
+  groq:      { name:"Groq", tag:"무료", type:"openai", base:"https://api.groq.com/openai/v1", model:"llama-3.3-70b-versatile",
+               free:"무료 · 분당 30회 · 하루 ~1,000회 · 아주 빠름", help:"console.groq.com → API Keys (구글 로그인 가능)", link:"https://console.groq.com/keys" },
+  github:    { name:"GitHub Models", tag:"무료", type:"openai", base:"https://models.github.ai/inference", model:"openai/gpt-4o-mini",
+               free:"무료 · GitHub 계정만 있으면 됨", help:"github.com/settings/tokens → 토큰 생성 (models:read 권한)", link:"https://github.com/settings/tokens" },
+  openrouter:{ name:"OpenRouter", tag:"무료 모델", type:"openai", base:"https://openrouter.ai/api/v1", model:"meta-llama/llama-3.3-70b-instruct:free",
+               free:"무료(:free 모델) · 하루 ~50회", help:"openrouter.ai → Keys (구글 로그인)", link:"https://openrouter.ai/keys" },
+  mistral:   { name:"Mistral AI", tag:"실험 무료", type:"openai", base:"https://api.mistral.ai/v1", model:"mistral-small-latest",
+               free:"무료 실험 플랜 · 초당 1회 · 학습 사용 옵트아웃 필요", help:"console.mistral.ai → API keys (전화번호 인증)", link:"https://console.mistral.ai/api-keys" },
+  deepseek:  { name:"DeepSeek", tag:"초저가 유료", type:"openai", base:"https://api.deepseek.com", model:"deepseek-chat",
+               free:"유료지만 매우 저렴 · 100만 토큰 ≈ 400원", help:"platform.deepseek.com → API keys (충전 필요)", link:"https://platform.deepseek.com/api_keys", paid:true },
+  ollama:    { name:"Ollama (내 컴퓨터)", tag:"완전 무료", type:"openai", base:"http://127.0.0.1:11434/v1", model:"qwen3:4b",
+               free:"완전 무료 · 내 PC에서 실행 · 외부 전송 없음", help:"ollama.com 설치 → 터미널에서 `ollama run qwen3:4b` (키 불필요)", link:"https://ollama.com", nokey:true },
+};
+const store = {
+  get(){ try { return JSON.parse(localStorage.getItem("daon_ai") || "{}"); } catch { return {}; } },
+  set(v){ localStorage.setItem("daon_ai", JSON.stringify(v)); },
+};
+function cfg(){ const s = store.get(); return { provider:s.provider || null, key:s.key || "", model:s.model || "", useAI: !!s.useAI }; }
+
+async function callAI(prompt, context){
+  const c = cfg(); if (!c.provider) throw new Error("연결된 AI가 없어요");
+  const p = PROVIDERS[c.provider];
+  const sys = `당신은 초등 기초학력 지도를 돕는 성인 멘토용 수업 조수 '다온'입니다.
+규칙:
+1. 아래 [근거 자료]에 있는 내용을 바탕으로 답하고, 자료에 없는 사실은 "제가 가진 자료에는 없어요"라고 솔직히 말하세요. 자료 ID를 꾸며내지 마세요.
+2. 답변 끝에 실제로 사용한 자료의 ID만 (출처: ID) 형식으로 짧게 표시하세요.
+3. 계산 문제는 스스로 정확히 계산하세요. 추정하지 마세요.
+4. 한국어로, 멘토가 바로 활용할 수 있게 짧고 따뜻하게 답하세요.
+5. 학생 개인정보를 묻거나 저장하려 하지 마세요.
+
+[근거 자료]
+${context || "(관련 자료 없음 — 이 경우 자료에 없다고 답하고 일반적인 수업 조언만 짧게 하세요)"}`;
+  if (p.type === "gemini"){
+    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${c.model}:generateContent`, {
+      method:"POST", headers:{ "x-goog-api-key": c.key, "Content-Type":"application/json" },
+      body: JSON.stringify({ systemInstruction:{ parts:[{ text:sys }] }, contents:[{ role:"user", parts:[{ text:prompt }] }], generationConfig:{ maxOutputTokens:800, temperature:0.3 } }),
+    });
+    if (!r.ok) throw new Error(`Gemini 오류 ${r.status}: ` + (await r.text()).slice(0,200));
+    const j = await r.json();
+    return j.candidates?.[0]?.content?.parts?.map(x => x.text).join("") || "빈 응답이 왔어요";
+  }
+  const headers = { "Content-Type":"application/json" };
+  if (c.key) headers["Authorization"] = `Bearer ${c.key}`;
+  const r = await fetch(`${p.base}/chat/completions`, {
+    method:"POST", headers,
+    body: JSON.stringify({ model:c.model, messages:[{ role:"system", content:sys }, { role:"user", content:prompt }], max_tokens:800, temperature:0.3 }),
+  });
+  if (!r.ok) throw new Error(`${p.name} 오류 ${r.status}: ` + (await r.text()).slice(0,200));
+  const j = await r.json();
+  return j.choices?.[0]?.message?.content || "빈 응답이 왔어요";
+}
+
+/* ═══════════════════ 6. 응답 규칙 (자료 없음·부정 의도·되묻기) ═══════════════════ */
+const PRIVATE_RE = [/[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}/, /(?<!\d)01[016789][-\s]?\d{3,4}[-\s]?\d{4}(?!\d)/, /(?<!\d)\d{6}[-\s]?[1-4]\d{6}(?!\d)/, /(?:학생\s*이름|성명|이름)\s*[:：=]\s*[가-힣A-Za-z]{2,}/];
+const NORESOURCE = [/교과서.*(쪽|페이지|정답)/, /(\d+\s*쪽|\d+\s*페이지)/, /(동영상|영상|유튜브|링크|주소).*(보여|알려|찾아|줘|링크)/, /(와이파이|wifi|비밀번호|비번)/, /(시험|기출|족보|정답지)/, /(날씨|주식|코인|뉴스)/];
+const NEG = /(말고|빼고|제외하고?|아니고|대신에?|없이)/;
+function classify(text){
+  const t = text.trim();
+  for (const re of PRIVATE_RE) if (re.test(t)) return { kind:"private" };
+  // 계산식 추출: 숫자+연산자 패턴이 있으면 계산 의도
+  const exprs = t.match(/[\d(][\d\s.+\-*/×÷()]*[)\d=](?:\s*은|는|=|얼마|계산|풀어)?/g);
+  const valid = (exprs || []).map(e => e.replace(/[은는]|얼마|계산|풀어|=| 줘|주세요/g,"").trim())
+                   .filter(e => /\d/.test(e) && /[+\-*/×÷]/.test(e));
+  if (valid.length) return { kind:"math", exprs:valid };
+  const { topic, excluded } = detectTopic(t);
+  if (/(수업안|수업 계획|수업계획|수업 준비|수업준비|레슨)/.test(t)) return { kind:"plan", topic, grade:Number(GRADE_NO.exec(t)?.[1]) || null, minutes:Number(MIN_NO.exec(t)?.[1]) || null, excluded };
+  if (/(연습문제|문제|퀴즈|문항|내줘|내 줘|만들어)/.test(t) && topic) return { kind:"quiz", topic, grade:Number(GRADE_NO.exec(t)?.[1]) || 3, excluded };
+  for (const re of NORESOURCE) if (re.test(t) && !NEG.test(t)) return { kind:"noresource" };
+  if (t.replace(/[^가-힣a-z0-9]/g,"").length < 4) return { kind:"unclear" };
+  return { kind:"search", topic, excluded, t };
+}
+function noResourceReply(){
+  return { text:"그건 제 자료에 없는 요청이에요 🙈\n교과서 쪽수·동영상 링크·시험 정답지처럼 실제 문서나 외부 링크가 필요한 건 지원하지 않아요.\n대신 아래 자료 안에서는 찾아드릴 수 있어요:", chips:true,
+           hint:"자료 범위: 덧셈·뺄셈·곱셈·나눗셈·분수 개념/활동/연습, 읽기 지도, 멘토링 기본 수칙" };
+}
+function mathReply(exprs){
+  const lines = [];
+  for (const e of exprs.slice(0,4)){
+    const isIntDiv = /÷/.test(e) && !/[.+*\-]/.test(e.replace(/^\s*-/,""));
+    try {
+      const f = parseExact(e);
+      let s = `**${e.trim()} = ${f.toStr()}**`;
+      if (isIntDiv && isInt(f)){
+        // a÷b 한 개 연산일 때 몫·나머지 추가
+        const m = e.replace(/÷/g,"/").match(/(\d+)\s*\/\s*(\d+)/);
+        if (m){ const { q, r } = divParts(BigInt(m[1]), BigInt(m[2])); if (r !== 0n) s += `\n몫 ${q}, 나머지 ${r} (검산: ${m[2]} × ${q} + ${r} = ${m[1]})`; }
+      }
+      lines.push(s);
+    } catch (err){ lines.push(`'${e.trim()}'는 계산 못 했어요 — ${err.message}`); }
+  }
+  return { text: lines.join("\n") + "\n\n(정확한 분수·정수 계산이라 어림이 아닌 진짜 답이에요)", math:true };
+}
+
+/* ═══════════════════ 7. UI ═══════════════════ */
+const $ = id => document.getElementById(id);
+document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".tab").forEach(x => x.classList.toggle("on", x === b));
+  document.querySelectorAll(".tabpanel").forEach(p => p.hidden = p.id !== "tab-" + b.dataset.tab);
+}));
+const esc = s => s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function mdLite(s){
+  let h = esc(s);
+  h = h.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+  h = h.replace(/\(출처:\s*([^)]+)\)/g, "<br>출처: $1");
+  return h;
+}
+function srcChips(rows){
+  if (!rows?.length) return "";
+  return `<div class="srcs">${rows.map(r => { const c = r.c || r; return `<button class="src" data-src="${c.chunk_id}" title="${esc(c.docTitle)}">${c.chunk_id}</button>`; }).join("")}</div>`;
+}
+function addMsg(role, html, tag){
+  const d = document.createElement("div");
+  d.className = `msg ${role}${tag ? " " + tag : ""}`;
+  d.innerHTML = html;
+  $("chatlog").appendChild(d);
+  $("chatlog").scrollTop = $("chatlog").scrollHeight;
+  return d;
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest(".src"); if (!b) return;
+  const c = ALL_CHUNKS.find(x => x.chunk_id === b.dataset.src); if (!c) return;
+  addMsg("bot", `<b>${esc(c.heading)}</b> · ${c.chunk_id}<br><span class="small">${esc(c.docTitle)}</span><br><br>${esc(c.text)}`);
+});
+const SUGGEST = ["3/4 + 1/8 계산해 줘", "85 ÷ 4는 몫과 나머지가 뭐야?", "4학년 나눗셈 수업안 만들어 줘", "분모와 분자를 어떻게 설명하면 좋을까?", "첫 만남에서 뭘 하면 좋아?", "학생 읽기 지도 방법 알려 줘"];
+function drawChips(){
+  $("chips").innerHTML = SUGGEST.map(s => `<button class="chip" type="button">${s}</button>`).join("");
+  $("chips").querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => { $("ask").value = c.textContent; $("composer").requestSubmit(); }));
+}
+let HISTORY = [];
+let busy = false;
+async function answer(text){
+  const cls = classify(text);
+  const useAI = cfg().useAI && cfg().provider;
+  if (cls.kind === "private") return { html:"이름·연락처·학교처럼 개인을 식별할 수 있는 내용은 입력하지 말아 주세요. 개인정보 없이 수업 목표나 개념만 알려 주시면 도와드릴게요.", srcs:null };
+  if (cls.kind === "noresource") return { html:mdLite(noResourceReply().text + "\n\n" + noResourceReply().hint), srcs:null };
+  if (cls.kind === "unclear") return { html:"조금 더 구체적으로 물어봐 주세요. 예: '분수 설명 방법', '4학년 곱셈 문제', '26÷7 계산' 처럼요.", srcs:null };
+  if (cls.kind === "math"){ const r = mathReply(cls.exprs); return { html:mdLite(r.text), srcs:null }; }
+  if (cls.kind === "plan"){
+    const topic = cls.topic || "fractions", grade = cls.grade || 3, minutes = cls.minutes || 40;
+    const plan = makePlan(grade, topic, minutes, "");
+    let h = `<b>${esc(plan.title)}</b> (${grade}학년)<br>`;
+    h += plan.steps.map(s => `<b>${s.phase}</b> ${s.min}분 — ${esc(s.name)}`).join("<br>");
+    h += `<div class="quiz"><b>확인 문제</b>${plan.quiz.map(q => `<br>· ${esc(q.q)}<details class="ans"><summary>정답 보기</summary><div><b>${esc(q.a)}</b> — ${esc(q.ex)}</div></details>`).join("")}</div>`;
+    h += `<div class="small" style="margin-top:6px">자세한 수업안은 📝 수업안 만들기 탭에서 내려받을 수 있어요.</div>`;
+    return { html:h, srcs:plan.sources.map(c => ({ c })) };
+  }
+  if (cls.kind === "quiz"){
+    const quiz = makeQuiz(cls.topic, cls.grade);
+    const meta = TOPICS.find(t => t.id === cls.topic);
+    let h = `<b>${meta.title} · ${cls.grade}학년 연습문제</b><div class="quiz">${quiz.map(q => `· ${esc(q.q)}<details class="ans"><summary>정답 보기</summary><div><b>${esc(q.a)}</b> — ${esc(q.ex)}</div></details>`).join("<br>")}</div>`;
+    return { html:h, srcs:search("", cls.topic, 3).map(s => ({ c:s.c })) };
+  }
+  // search
+  const rows = search(cls.t, cls.topic);
+  if (useAI){
+    try {
+      const ctx = rows.slice(0,3).map(r => `[${r.c.chunk_id}] ${r.c.heading}: ${r.c.text}`).join("\n\n");
+      const aiText = await callAI(text, ctx);
+      HISTORY.push({ q:text, a:aiText.slice(0,500) });
+      return { html:mdLite(aiText) + `<div class="tagline">${PROVIDERS[cfg().provider].name} · 근거 자료 ${rows.length}건 참고 · 미검증 초안입니다</div>`, srcs:rows.slice(0,3), ai:true };
+    } catch (e){
+      return { html:mdLite(`AI 연결에 실패해서 로컬 답변으로 대신할게요.\n(${e.message.slice(0,120)})`) + localSearchHtml(rows), srcs:rows, err:true };
+    }
+  }
+  if (!rows.length) return { html:mdLite("자료에서 관련 내용을 못 찾았어요. 없다고 꾸며내지 않고 그냥 알려드려요 🙈\n\n찾을 수 있는 범위: " + TOPICS.map(t => t.title).join(" · ")), srcs:null };
+  const top = rows[0].c;
+  let h = `<b>${esc(top.heading)}</b> 내용이 가장 가까워요.<br><br>${esc(top.text)}`;
+  if (rows[1]) h += `<br><br><span class="small">참고로 '${esc(rows[1].c.heading)}' 자료도 있어요.</span>`;
+  return { html:h, srcs:rows.slice(0,3) };
+}
+function localSearchHtml(rows){
+  if (!rows.length) return "<br>자료에도 없는 내용이에요.";
+  const top = rows[0].c;
+  return `<br><br><b>${esc(top.heading)}</b> 자료: ${esc(top.text.slice(0,180))}…`;
+}
+$("composer").addEventListener("submit", async e => {
+  e.preventDefault();
+  const q = $("ask").value.trim(); if (!q || busy) return;
+  $("ask").value = ""; busy = true; $("sendBtn").disabled = true;
+  addMsg("user", esc(q));
+  const th = document.createElement("div"); th.className = "thinking"; th.textContent = "생각 중"; $("chatlog").appendChild(th);
+  $("chatlog").scrollTop = $("chatlog").scrollHeight;
+  try {
+    const r = await answer(q);
+    th.remove();
+    const d = addMsg("bot", r.html + srcChips(r.srcs), r.ai ? "ai" : "");
+    if (r.err) d.style.borderColor = "var(--rose-line)";
+  } catch (err){
+    th.remove(); addMsg("bot", "문제가 생겼어요: " + esc(String(err).slice(0,150)));
+  }
+  busy = false; $("sendBtn").disabled = false;
+});
+
+/* ── 수업안 탭 ── */
+TOPICS.forEach(t => { const o = document.createElement("option"); o.value = t.id; o.textContent = `${t.title} — ${t.desc}`; $("pTopic").appendChild(o); });
+function planHtml(p){
+  let h = `<h3>${esc(p.title)}</h3><p class="small">${p.grade}학년 · ${p.minutes}분${p.goal ? " · 목표: " + esc(p.goal) : ""}</p>`;
+  h += `<p style="margin:8px 0;font-size:14px"><b>목표</b> — ${p.objectives.map(esc).join("<br>")}</p>`;
+  h += p.steps.map(s => `<div class="phase"><b>${s.phase}</b><span class="min">${s.min}분</span> ${esc(s.name)}<ul>${s.list.filter(Boolean).map(i => `<li>${esc(i)}</li>`).join("")}</ul></div>`).join("");
+  h += `<div class="quiz"><b>연습문제 3개</b>${p.quiz.map(q => `<br><br>· ${esc(q.q)}<details class="ans"><summary>정답·해설 보기</summary><div><b>${esc(q.a)}</b><br>${esc(q.ex)}</div></details>`).join("")}</div>`;
+  h += `<div class="small" style="margin-top:10px">출처 자료: ${p.sources.map(c => c.chunk_id).join(" · ")}</div>`;
+  h += `<div style="margin-top:12px;font-size:14px"><b>수업 전 체크</b><ul style="margin:4px 0;padding-left:20px">${p.checklist.map(c => `<li>${esc(c)}</li>`).join("")}</ul></div>`;
+  h += `<div class="warnbox">${p.warnings.map(esc).join("<br>")}</div>`;
+  return h;
+}
+function planText(p){
+  return `${p.title} (${p.grade}학년)\n\n목표:\n${p.objectives.map(o=>"- "+o).join("\n")}\n\n` +
+    p.steps.map(s => `■ ${s.phase} (${s.min}분) ${s.name}\n${s.list.filter(Boolean).map(i=>"  - "+i).join("\n")}`).join("\n\n") +
+    `\n\n■ 연습문제\n${p.quiz.map((q,i)=>`${i+1}. ${q.q}\n   정답: ${q.a} / ${q.ex}`).join("\n")}` +
+    `\n\n출처: ${p.sources.map(c=>c.chunk_id).join(", ")}\n\n⚠ ${p.warnings.join("\n⚠ ")}`;
+}
+let LAST_PLAN = null;
+$("planBtn").addEventListener("click", () => {
+  const goal = $("pGoal").value.trim();
+  if (PRIVATE_RE.some(re => re.test(goal))){ $("planOut").innerHTML = `<div class="warnbox">목표에 개인정보처럼 보이는 내용이 있어요. 개인을 식별할 수 없는 일반 목표만 써 주세요.</div>`; return; }
+  const p = makePlan(Number($("pGrade").value), $("pTopic").value, Number($("pMin").value), goal);
+  LAST_PLAN = p;
+  const c = cfg();
+  $("planOut").innerHTML = planHtml(p) + `<div class="toolrow">
+    <button id="copyPlan" type="button">📋 전체 복사</button>
+    <button id="dlPlan" type="button">⬇ 텍스트로 내려받기</button>
+    ${c.useAI && c.provider ? `<button id="aiTip" type="button" style="border-color:var(--lav-line);color:var(--lav)">✨ AI 지도 팁 받아보기</button>` : ""}
+  </div><div id="aiTipOut"></div>`;
+  $("copyPlan").onclick = async () => { await navigator.clipboard.writeText(planText(p)); $("copyPlan").textContent = "복사했어요 ✓"; };
+  $("dlPlan").onclick = () => {
+    const b = new Blob([planText(p)], { type:"text/plain;charset=utf-8" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = `수업안_${p.topic}_${p.grade}학년.txt`; a.click(); URL.revokeObjectURL(a.href);
+  };
+  const tip = $("aiTip"); if (tip) tip.onclick = async () => {
+    tip.disabled = true; tip.textContent = "AI 생각 중…";
+    try {
+      const out = await callAI(`다음 수업안을 보고 멘토에게 줄 지도 팁 3가지를 한국어로 짧게 제안해 주세요. 수업 내용이나 정답을 바꾸지 말고 교수법 조언만 하세요.\n\n${planText(p).slice(0,2500)}`, "");
+      $("aiTipOut").innerHTML = `<div class="phase" style="border-color:var(--lav);background:var(--lav-soft)"><b style="color:var(--lav)">✨ AI 지도 팁 (미검증 초안)</b><div style="font-size:14px;margin-top:4px">${mdLite(out)}</div></div>`;
+    } catch(e){ $("aiTipOut").innerHTML = `<div class="warnbox">AI 호출 실패: ${esc(e.message.slice(0,120))}</div>`; }
+    tip.disabled = false; tip.textContent = "✨ AI 지도 팁 받아보기";
+  };
+});
+
+/* ── AI 연결 탭 ── */
+function drawProviders(){
+  const c = cfg();
+  $("providers").innerHTML = Object.entries(PROVIDERS).map(([id,p]) => `
+    <label class="provider${c.provider === id ? " sel" : ""}">
+      <input type="radio" name="pv" value="${id}" ${c.provider === id ? "checked" : ""} style="display:none">
+      <div class="pname">${p.name}</div>
+      <div class="pdesc">${p.help} · <a href="${p.link}" target="_blank" rel="noopener">발급 페이지 ↗</a></div>
+      <span class="free${p.paid ? " paid" : ""}">${p.free}</span>
+    </label>`).join("");
+  document.querySelectorAll("input[name=pv]").forEach(r => r.addEventListener("change", () => {
+    const p = PROVIDERS[r.value];
+    $("apiModel").value = p.model;
+    $("keyHelp").textContent = p.nokey ? "(Ollama는 키 불필요 — 비워 두세요)" : `— ${p.help}`;
+    const s = store.get(); s.provider = r.value; s.model = p.model; store.set(s);
+    drawProviders(); refreshMode();
+  }));
+  const cur = cfg(); if (cur.provider){ $("apiModel").value = cur.model || PROVIDERS[cur.provider].model; $("keyHelp").textContent = PROVIDERS[cur.provider].nokey ? "(Ollama는 키 불필요)" : "— " + PROVIDERS[cur.provider].help; }
+}
+$("keySave").addEventListener("click", () => {
+  const s = store.get(); s.key = $("apiKey").value.trim(); s.model = $("apiModel").value.trim() || s.model; store.set(s);
+  refreshMode(); connStatus("저장했어요. 연결 테스트로 확인해 보세요.", true);
+});
+$("keyDel").addEventListener("click", () => { const s = store.get(); delete s.key; delete s.provider; delete s.useAI; store.set(s); $("apiKey").value = ""; drawProviders(); refreshMode(); connStatus("키를 삭제했어요.", true); });
+function connStatus(msg, ok){ const el = $("connStatus"); el.textContent = msg; el.className = "status " + (ok ? "ok" : "err"); }
+$("testBtn").addEventListener("click", async () => {
+  const c = cfg(); if (!c.provider){ connStatus("먼저 서비스를 골라 주세요.", false); return; }
+  connStatus("확인 중…", true);
+  try {
+    const out = await callAI("'연결됨'이라고만 답해 주세요.", "");
+    connStatus(`✓ 연결 성공 — ${PROVIDERS[c.provider].name}: ${out.slice(0,60)}`, true);
+  } catch(e){ connStatus("연결 실패: " + e.message.slice(0,160), false); }
+});
+function refreshMode(){
+  const c = cfg();
+  const on = c.useAI && c.provider;
+  $("modebar").classList.toggle("on", !!on);
+  $("modetext").textContent = on ? `AI 모드 — ${PROVIDERS[c.provider].name} (${c.model}) + 자료 검색` : "로컬 모드 — 자료 검색·템플릿·정확 계산";
+  $("modeToggle").textContent = on ? "AI 답변 끄기" : (c.provider ? "AI 답변 켜기" : "AI 연결하러 가기");
+}
+$("modeToggle").addEventListener("click", () => {
+  const s = store.get();
+  if (!s.provider){ document.querySelector('[data-tab="connect"]').click(); return; }
+  s.useAI = !s.useAI; store.set(s); refreshMode();
+  addMsg("bot", s.useAI ? `AI 모드를 켰어요. 이제 ${esc(PROVIDERS[s.provider].name)}가 자료를 참고해 답합니다.` : "로컬 모드로 돌아왔어요.");
+});
+
+/* ── 시작 ── */
+drawChips(); drawProviders(); refreshMode();
+addMsg("bot", `안녕하세요, 멘토님! 저는 <b>다온</b>이에요 🦆<br><br>지금은 <b>로컬 모드</b>라 계산·수업안·자료 검색을 정확하게 도와드려요. 🔑 무료 AI 연결 탭에서 키를 넣으면 더 자연스러운 대화가 가능해요.<br><br>아래 버튼을 눌러 바로 시작해 보세요!`);
+</script>
+</body>
+</html>
