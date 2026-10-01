@@ -97,6 +97,7 @@ a{color:var(--mint)}
 
 /* ── 섹션 공통 ── */
 section{margin-top:46px}
+section[id]{scroll-margin-top:70px}
 .sec-head{display:flex; align-items:center; gap:12px; margin-bottom:8px; flex-wrap:wrap}
 .sec-no{
   flex:0 0 auto; min-width:44px; height:44px; padding:0 10px; border-radius:14px;
@@ -791,6 +792,9 @@ Q2. 아까 나타낸 부분을 분수로 써 볼 수 있어요?
 </div>
 
 <script>
+window.addEventListener('beforeprint', function(){
+  document.querySelectorAll('details.faq').forEach(function(d){ d.open = true; });
+});
 document.querySelectorAll('.copybtn').forEach(function(btn){
   btn.addEventListener('click', function(){
     var el = document.getElementById(btn.dataset.copy);
