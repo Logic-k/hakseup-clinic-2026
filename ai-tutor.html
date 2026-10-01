@@ -258,7 +258,6 @@ function parseExact(src){
   if (cur()[0] !== "end") throw new MErr("뒷부분을 이해 못 했어요");
   return r;
 }
-const isInt = f => f.d === 1n;
 function divParts(a, b){ // 양의 정수 몫·나머지
   const q = a / b, r = a % b; return { q, r };
 }
@@ -520,16 +519,20 @@ function noResourceReply(){
 function mathReply(exprs){
   const lines = [];
   for (const e of exprs.slice(0,4)){
-    const isIntDiv = /÷/.test(e) && !/[.+*\-]/.test(e.replace(/^\s*-/,""));
+    const parts = e.split("÷");
+    const intPair = parts.length === 2 && /^\s*\d+\s*$/.test(parts[0]) && /^\s*\d+\s*$/.test(parts[1]);
     try {
-      const f = parseExact(e);
-      let s = `**${e.trim()} = ${f.toStr()}**`;
-      if (isIntDiv && isInt(f)){
-        // a÷b 한 개 연산일 때 몫·나머지 추가
-        const m = e.replace(/÷/g,"/").match(/(\d+)\s*\/\s*(\d+)/);
-        if (m){ const { q, r } = divParts(BigInt(m[1]), BigInt(m[2])); if (r !== 0n) s += `\n몫 ${q}, 나머지 ${r} (검산: ${m[2]} × ${q} + ${r} = ${m[1]})`; }
+      if (intPair){
+        const a = BigInt(parts[0].trim()), b = BigInt(parts[1].trim());
+        if (b === 0n){ lines.push(`**${e.trim()}** — 0으로 나눌 수 없어요`); continue; }
+        const { q, r } = divParts(a, b);
+        lines.push(r === 0n
+          ? `**${e.trim()} = ${q}**`
+          : `**${e.trim()} = 몫 ${q}, 나머지 ${r}**\n검산: ${b} × ${q} + ${r} = ${a}`);
+        continue;
       }
-      lines.push(s);
+      const f = parseExact(e);
+      lines.push(`**${e.trim()} = ${f.toStr()}**`);
     } catch (err){ lines.push(`'${e.trim()}'는 계산 못 했어요 — ${err.message}`); }
   }
   return { text: lines.join("\n") + "\n\n(정확한 분수·정수 계산이라 어림이 아닌 진짜 답이에요)", math:true };
