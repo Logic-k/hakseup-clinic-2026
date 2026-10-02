@@ -137,6 +137,17 @@ section[id]{scroll-margin-top:70px}
 .promise ul{margin:13px 0 0; padding-left:23px}
 .promise li{margin-bottom:8px; font-size:17px; line-height:1.7}
 .promise li b{color:var(--rose); font-weight:800}
+.promise .mark{
+  color:var(--rose); font-weight:800;
+  text-decoration:underline wavy var(--rose) 2px; text-underline-offset:4px;
+  background:linear-gradient(transparent 80%, rgba(255,233,138,.85) 80%);
+  padding:0 1px;
+}
+.promise .mark::before,.promise .mark::after{
+  content:"★"; font-size:.68em; color:var(--rose); vertical-align:.28em; letter-spacing:.05em;
+}
+.promise .mark::before{margin-right:2px}
+.promise .mark::after{margin-left:2px}
 .okx{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px}
 .okx .cell{border-radius:14px; padding:15px 16px; font-size:16px; line-height:1.7}
 .okx .no{background:#fff; border:2.5px solid var(--rose)}
@@ -412,9 +423,9 @@ details.faq .ans{padding:0 18px 16px 56px; font-size:14.8px; color:var(--ink2)}
       <div class="inner">
       <h3><span style="display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--rose);color:#fff;font-size:18px">!</span> AI에 넣어도 되는 것 / 안 되는 것 <span class="must">꼭 지켜주세요</span></h3>
       <ul>
-        <li><b>학생 개인정보 금지</b> — 이름, 학교·학급, 연락처, 진단보고서 원문, 상담 내용은 절대 입력하지 않아요.</li>
-        <li><b>학습 정보만 입력</b> — 학년·실제 수준·결손 개념·수업 시간처럼 “누군지 알 수 없는” 정보만 씁니다.</li>
-        <li><b>결과는 초안 취급</b> — AI가 만든 정답·해설·성취기준 코드는 반드시 사람이 확인한 뒤 사용해요.</li>
+        <li><b>학생 개인정보 금지</b> — 이름, 학교·학급, 연락처, 진단보고서 원문, 상담 내용은 <span class="mark">절대 입력하지 않아요.</span></li>
+        <li><b>학습 정보만 입력</b> — 학년·실제 수준·결손 개념·수업 시간처럼 <span class="mark">“누군지 알 수 없는” 정보만 씁니다.</span></li>
+        <li><b>결과는 초안 취급</b> — AI가 만든 정답·해설·성취기준 코드는 <span class="mark">반드시 사람이 확인한 뒤 사용</span>해요.</li>
       </ul>
       <div class="okx">
         <div class="cell no">
