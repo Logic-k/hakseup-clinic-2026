@@ -451,8 +451,8 @@ const PROVIDERS = {
                free:"무료 실험 플랜 · 초당 1회 · 학습 사용 옵트아웃 필요", help:"console.mistral.ai → API keys (전화번호 인증)", link:"https://console.mistral.ai/api-keys" },
   deepseek:  { name:"DeepSeek", tag:"초저가 유료", type:"openai", base:"https://api.deepseek.com", model:"deepseek-chat",
                free:"유료지만 매우 저렴 · 100만 토큰 ≈ 400원", help:"platform.deepseek.com → API keys (충전 필요)", link:"https://platform.deepseek.com/api_keys", paid:true },
-  ollama:    { name:"Ollama (내 컴퓨터)", tag:"완전 무료", type:"openai", base:"http://127.0.0.1:11434/v1", model:"qwen3:4b",
-               free:"완전 무료 · 내 PC에서 실행 · 외부 전송 없음", help:"ollama.com 설치 → 터미널에서 `ollama run qwen3:4b` (키 불필요)", link:"https://ollama.com", nokey:true },
+  ollama:    { name:"Ollama (내 컴퓨터)", tag:"완전 무료", type:"openai", base:"http://127.0.0.1:11434/v1", model:"exaone3.5:2.4b",
+               free:"완전 무료 · 내 PC에서 실행 · 외부 전송 없음", help:"ollama.com 설치 → 터미널에서 `ollama run exaone3.5:2.4b` (키 불필요)", link:"https://ollama.com", nokey:true },
 };
 const store = {
   get(){ try { return JSON.parse(localStorage.getItem("daon_ai") || "{}"); } catch { return {}; } },
@@ -484,13 +484,17 @@ ${context || "(관련 자료 없음 — 이 경우 자료에 없다고 답하고
   }
   const headers = { "Content-Type":"application/json" };
   if (c.key) headers["Authorization"] = `Bearer ${c.key}`;
+  const body = { model:c.model, messages:[{ role:"system", content:sys }, { role:"user", content:prompt }], max_tokens:800, temperature:0.3 };
+  if (c.provider === "ollama") body.think = false; // qwen3 등 로컬 모델의 사고 토큰 낭비·빈 응답 방지
   const r = await fetch(`${p.base}/chat/completions`, {
     method:"POST", headers,
-    body: JSON.stringify({ model:c.model, messages:[{ role:"system", content:sys }, { role:"user", content:prompt }], max_tokens:800, temperature:0.3 }),
+    body: JSON.stringify(body),
   });
   if (!r.ok) throw new Error(`${p.name} 오류 ${r.status}: ` + (await r.text()).slice(0,200));
   const j = await r.json();
-  return j.choices?.[0]?.message?.content || "빈 응답이 왔어요";
+  const msg = j.choices?.[0]?.message;
+  const text = (msg?.content || "").replace(/<think>[\s\S]*?<\/think>/g, "").trim() || msg?.reasoning_content?.trim();
+  return text || "빈 응답이 왔어요";
 }
 
 /* ═══════════════════ 6. 응답 규칙 (자료 없음·부정 의도·되묻기) ═══════════════════ */
