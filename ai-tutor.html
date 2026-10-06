@@ -106,6 +106,48 @@ details.ans div{padding:5px 0 0 2px; color:var(--ink2)}
 .status{font-size:13.5px; padding:8px 12px; border-radius:10px; margin-top:8px; display:none}
 .status.ok{display:block; background:var(--mint-soft); color:#1f7a6e}
 .status.err{display:block; background:var(--rose-soft); color:#8a3a4a}
+/* ── 모드·프로필·힌트 ── */
+.seg{display:inline-flex; border:1.5px solid var(--line); border-radius:999px; overflow:hidden}
+.seg button{border:0; background:#fff; padding:6px 14px; font-size:13.5px; color:var(--ink2); font-family:"Gaegu",sans-serif; font-size:15px}
+.seg button.on{background:var(--lav); color:#fff}
+.chatbar{display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:10px; font-size:13.5px}
+.chatbar select{border:1.5px solid var(--line); border-radius:9px; padding:5px 9px; font-size:13.5px; font-family:inherit; background:#fff}
+.chatbar button{border:1.5px solid var(--line); background:#fff; border-radius:9px; padding:5px 10px; font-size:13px; color:var(--ink2)}
+.chatbar button:hover{border-color:var(--mint-line); color:var(--mint)}
+.stubanner{background:var(--lav-soft); border:1.5px solid var(--lav-line); border-radius:12px; padding:9px 13px; font-size:13px; color:#5d4898; margin-bottom:10px; display:none}
+.stubanner.on{display:block}
+details.hint{margin:4px 0 4px 12px; font-size:13.5px}
+details.hint summary{cursor:pointer; color:var(--lav); font-size:13px}
+details.hint div{padding:4px 0 0 2px; color:var(--ink2)}
+.markrow{display:inline-flex; gap:5px; margin-left:8px; vertical-align:middle}
+.markrow button{border:1px solid var(--line); background:#fff; border-radius:8px; padding:2px 8px; font-size:12px; color:var(--ink2)}
+.markrow button.right{border-color:var(--mint-line); color:var(--mint)}
+.markrow button.wrong{border-color:var(--rose-line); color:var(--rose)}
+.markrow button.done{background:var(--mint-soft); border-color:var(--mint-line); color:var(--mint)}
+.markrow button.doneW{background:var(--rose-soft); border-color:var(--rose-line); color:var(--rose)}
+.checkline{font-size:12.5px; margin-top:7px; padding:6px 10px; border-radius:9px; background:var(--mint-soft); color:#1f7a6e}
+.checkline.warn{background:var(--rose-soft); color:#8a3a4a}
+.checkline b{margin-right:4px}
+/* ── 사진 첨부 ── */
+.composer .imgbtn{border:1.5px solid var(--line); background:#fff; border-radius:12px; padding:0 13px; font-size:16px; color:var(--ink2)}
+.composer .imgbtn:hover{border-color:var(--mint-line); color:var(--mint)}
+.imgprev{display:none; align-items:center; gap:8px; margin-top:8px; font-size:13px; color:var(--ink2)}
+.imgprev.on{display:flex}
+.imgprev img{height:44px; border-radius:8px; border:1.5px solid var(--line)}
+.imgprev button{border:0; background:var(--rose-soft); color:var(--rose); border-radius:8px; padding:3px 9px; font-size:12px}
+/* ── 수준 변환 ── */
+.lvlgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:10px; margin-top:14px}
+.lvlcard{border:1.5px solid var(--line); border-radius:14px; padding:13px 15px; font-size:14px; background:#fff}
+.lvlcard h4{font-family:"Gaegu",sans-serif; font-size:17px; margin:0 0 6px}
+.lvlcard.easy{border-color:var(--mint-line); background:var(--mint-soft)}
+.lvlcard.easy h4{color:#1f7a6e}
+.lvlcard.hard{border-color:var(--lav-line); background:var(--lav-soft)}
+.lvlcard.hard h4{color:#5d4898}
+/* ── 일지 ── */
+.jitem{display:flex; gap:8px; align-items:baseline; font-size:13.5px; padding:6px 2px; border-bottom:1px dashed var(--line)}
+.jitem .jt{color:var(--peach); font-weight:700; flex:0 0 46px}
+.jitem .jk{color:var(--ink2); font-size:12px; flex:0 0 auto}
+.jout{white-space:pre-wrap; background:var(--paper2); border:1.5px dashed var(--peach-line); border-radius:12px; padding:14px 16px; font-size:14px; margin-top:14px; font-family:inherit}
 @media(max-width:560px){.msg{max-width:96%}.hero h1{font-size:25px}}
 @media print{.tabs,.composer,.chips,.modebar,.toolrow,.keyrow{display:none}.card{box-shadow:none;border-color:#ccc}}
 </style>
@@ -133,6 +175,8 @@ details.ans div{padding:5px 0 0 2px; color:var(--ink2)}
   <nav class="tabs">
     <button class="tab on" data-tab="chat">💬 챗봇</button>
     <button class="tab" data-tab="plan">📝 수업안 만들기</button>
+    <button class="tab" data-tab="level">📊 수준 맞춤</button>
+    <button class="tab" data-tab="journal">📒 활동일지</button>
     <button class="tab" data-tab="connect">🔑 무료 AI 연결</button>
     <button class="tab" data-tab="help">❓ 이렇게 쓰세요</button>
   </nav>
@@ -140,13 +184,24 @@ details.ans div{padding:5px 0 0 2px; color:var(--ink2)}
   <!-- ═══ 챗봇 ═══ -->
   <section class="tabpanel" id="tab-chat">
     <div class="card">
+      <div class="chatbar">
+        <span class="seg" id="whoSeg">
+          <button type="button" data-who="mentor" class="on">🧑‍🏫 멘토</button>
+          <button type="button" data-who="student">🧒 학생(힌트)</button>
+        </span>
+        <span id="profWrap">학생 <select id="profSel"></select><button id="profAdd" type="button">+ 별칭 추가</button><button id="profMiss" type="button">오답 보기</button></span>
+      </div>
+      <div class="stubanner" id="stubanner">🧒 <b>학생 모드</b> — 답 대신 힌트로 이끌어 줍니다. 13세 미만은 반드시 선생님·보호자와 함께 사용하세요. 이 모드에서는 대화·기록이 저장되지 않고, 힘든 이야기가 나오면 어른에게 말하라고 안내합니다.</div>
       <div class="chatlog" id="chatlog"></div>
       <div class="chips" id="chips"></div>
       <form class="composer" id="composer">
+        <input type="file" id="imgFile" accept="image/*" hidden>
+        <button type="button" class="imgbtn" id="imgBtn" title="문제 사진 첨부 (AI 연결 시)">📷</button>
         <input id="ask" autocomplete="off" maxlength="300" placeholder="예: 3/4+1/8 계산해 줘 · 4학년 나눗셈 수업안 · 분모와 분자 설명">
         <button type="submit" id="sendBtn">보내기</button>
       </form>
-      <p class="small" style="margin-top:8px">이름·연락처 등 학생 개인정보는 입력하지 마세요. AI 연결 시 질문이 해당 외부 서비스로 전송됩니다.</p>
+      <div class="imgprev" id="imgPrev"><img id="imgThumb" alt="첨부한 문제 사진"><span id="imgName"></span><button type="button" id="imgDel">삭제</button></div>
+      <p class="small" style="margin-top:8px">이름·연락처 등 학생 개인정보는 입력하지 마세요. AI 연결 시 질문(과 사진)이 해당 외부 서비스로 전송됩니다.</p>
     </div>
   </section>
 
@@ -165,6 +220,33 @@ details.ans div{padding:5px 0 0 2px; color:var(--ink2)}
         <input id="pGoal" maxlength="300" placeholder="예: 받아내림이 있는 뺄셈을 천천히 연습"></div>
       <button class="bigbtn" id="planBtn" type="button">수업안 만들기</button>
       <div class="planout" id="planOut"></div>
+    </div>
+  </section>
+
+  <!-- ═══ 수준 맞춤 ═══ -->
+  <section class="tabpanel" id="tab-level" hidden>
+    <div class="card">
+      <h2 style="font-size:21px">수준별로 바꿔 보기</h2>
+      <p class="small" style="margin:6px 0 12px">설명·지문·지시문을 붙여 넣으면 <b>쉬운 말 · 보통 · 도전</b> 세 수준으로 바꿔 줘요. 기초가 다른 아이들에게 같은 내용을 다르게 건넬 때 씁니다.</p>
+      <div class="field"><label>바꿀 문장 (개인정보 금지)</label>
+        <textarea id="lvlIn" rows="4" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14.5px;font-family:inherit" placeholder="예: 나머지는 나누는 수보다 항상 작아야 해. 나머지가 나누는 수보다 크거나 같으면 묶음을 하나 더 만들 수 있다는 뜻이거든."></textarea></div>
+      <button class="bigbtn" id="lvlBtn" type="button">세 수준으로 바꾸기</button>
+      <div class="lvlgrid" id="lvlOut"></div>
+      <p class="small" style="margin-top:10px">로컬 모드는 규칙 기반이라 쉬운 말 치환·문장 나누기 정도만 돼요. AI를 연결하면 훨씬 자연스러운 변환을 해 줍니다.</p>
+    </div>
+  </section>
+
+  <!-- ═══ 활동일지 ═══ -->
+  <section class="tabpanel" id="tab-journal" hidden>
+    <div class="card">
+      <h2 style="font-size:21px">오늘의 멘토 활동일지</h2>
+      <p class="small" style="margin:6px 0 12px">이 브라우저에서 오늘 한 활동(수업안·연습문제·오답 기록·AI 질문)을 모아 일지 초안을 만들어 줘요. 기록은 이 기기에만 저장되고, 지우면 영구 삭제됩니다.</p>
+      <div id="jList"></div>
+      <div class="toolrow">
+        <button id="jMake" type="button">📝 일지 초안 만들기</button>
+        <button id="jClear" type="button">오늘 기록 지우기</button>
+      </div>
+      <div id="jOut"></div>
     </div>
   </section>
 
@@ -197,9 +279,14 @@ details.ans div{padding:5px 0 0 2px; color:var(--ink2)}
       <h2 style="font-size:21px">무엇을 할 수 있나요</h2>
       <ul style="font-size:14.5px; padding-left:20px; line-height:2">
         <li><b>계산·검산</b> — <code>487+268</code>, <code>85÷4</code>, <code>3/4+1/8</code> 처럼 입력하면 브라우저 안의 정확 계산기가 분수·몫·나머지까지 답합니다. AI가 아니라 확정된 계산이라 틀리지 않아요.</li>
-        <li><b>수업안·연습문제</b> — 학년·주제·시간을 고르면 도입–탐구–연습–정리 흐름과 문제 3개, 정답·해설·출처를 만듭니다.</li>
-        <li><b>자료 검색</b> — "분모와 분자 뜻" 같은 질문에 직접 작성한 지도 자료 21개 조각에서 근거를 찾아 답합니다. 자료에 없는 건 없다고 말합니다.</li>
-        <li><b>AI 대화(선택)</b> — 무료 API를 연결하면 찾은 자료를 근거로 AI가 자연스럽게 풀어 설명합니다. 출처 없는 설명은 AI가 아니라 자료 기반으로만 답하도록 제한했습니다.</li>
+        <li><b>수업안·연습문제</b> — 학년·주제·시간을 고르면 도입–탐구–연습–정리 흐름과 문제 3개, 정답·해설·힌트·출처를 만듭니다.</li>
+        <li><b>자료 검색</b> — 직접 작성한 지도 자료에서 근거를 찾아 답합니다. 자료에 없는 건 없다고 말합니다.</li>
+        <li><b>학생(힌트) 모드</b> — 챗봇 상단의 '학생'을 누르면 정답 대신 힌트 단계로 이끌고, 기록을 남기지 않습니다. 학생이 직접 쓸 때 켜세요.</li>
+        <li><b>학생 별칭·오답 노트</b> — 실명 대신 별칭으로 학생을 고르고, 문제의 ✓/✗ 버튼으로 맞힘·틀림을 기록합니다. 이 기기에만 저장됩니다.</li>
+        <li><b>수준 맞춤</b> — 설명문을 쉬운 말·보통·도전 3단계로 바꿉니다.</li>
+        <li><b>활동일지</b> — 오늘 한 활동을 모아 일지 초안을 만들어 줍니다.</li>
+        <li><b>사진 문제</b> — 📷로 문제 사진을 올리면 AI가 읽고 힌트를 줍니다(Gemini·GitHub 무료 연결 시).</li>
+        <li><b>AI 대화(선택)</b> — 무료 API를 연결하면 찾은 자료를 근거로 AI가 자연스럽게 풀어 설명합니다. 답변 아래 자동 점검(없는 출처·주의 표현·계산 검산)을 표시합니다.</li>
       </ul>
       <h2 style="font-size:21px; margin-top:18px">정직하게 알려드리는 한계</h2>
       <ul style="font-size:14.5px; padding-left:20px; line-height:2">
@@ -266,35 +353,67 @@ function divParts(a, b){ // 양의 정수 몫·나머지
 const AUTHOR = "다온 튜터 제작 · 직접 작성 예시";
 const DISCLAIMER = "직접 작성한 시연 자료입니다. 교육부·교육청 공식 교육과정이나 검정 교과서가 아닙니다.";
 const TOPICS = [
-  { id:"fractions", title:"분수의 의미", desc:"같게 나눈 부분과 전체의 관계" },
-  { id:"addition", title:"덧셈과 자리값", desc:"자리값을 맞추고 받아올림 이해" },
-  { id:"subtraction", title:"뺄셈과 받아내림", desc:"모자란 자리에서 수를 바꾸어 계산" },
-  { id:"multiplication", title:"곱셈과 묶음", desc:"같은 크기 묶음을 곱셈으로" },
-  { id:"division", title:"나눗셈과 나머지", desc:"똑같이 나누고 남는 수 확인" },
-  { id:"reading", title:"읽기·어휘 지도", desc:"소리 내어 읽기와 어휘 연결" },
-  { id:"mentoring", title:"멘토링 기본", desc:"첫 만남·관계·안전 수칙" },
+  { id:"number", title:"수의 크기·자리값", desc:"받아보기·자리값·수 비교", area:"수학 · 수와 연산" },
+  { id:"fractions", title:"분수의 의미", desc:"같게 나눈 부분과 전체의 관계", area:"수학 · 수와 연산" },
+  { id:"addition", title:"덧셈과 자리값", desc:"자리값을 맞추고 받아올림 이해", area:"수학 · 수와 연산" },
+  { id:"subtraction", title:"뺄셈과 받아내림", desc:"모자란 자리에서 수를 바꾸어 계산", area:"수학 · 수와 연산" },
+  { id:"multiplication", title:"곱셈과 묶음", desc:"같은 크기 묶음을 곱셈으로", area:"수학 · 수와 연산" },
+  { id:"division", title:"나눗셈과 나머지", desc:"똑같이 나누고 남는 수 확인", area:"수학 · 수와 연산" },
+  { id:"reading", title:"읽기·어휘 지도", desc:"소리 내어 읽기와 어휘 연결", area:"국어 · 읽기" },
+  { id:"writing", title:"쓰기·맞춤법 지도", desc:"띄어쓰기·받아쓰기·문장 다듬기", area:"국어 · 쓰기" },
+  { id:"emotion", title:"학습동기·정서 지원", desc:"자신감·회피 줄이기·칭찬의 방법", area:"정서·동기" },
+  { id:"mentoring", title:"멘토링 기본", desc:"첫 만남·관계·안전 수칙", area:"멘토링 운영" },
+  { id:"parent", title:"학부모 소통", desc:"가정 연계·안내문·상담 기본", area:"멘토링 운영" },
+  { id:"resource", title:"공식 보정자료 연계", desc:"교육청 진단-보정 시스템·온채움 안내", area:"연계 안내" },
 ];
 const CONTENT = {
+ number:[
+  ["concept","자리값과 수의 크기","10이 10개이면 100, 100이 10개이면 1000이다. 자리마다 묶음의 크기가 다르다는 것이 자리값이다. 수의 크기를 비교할 때는 맨 위 자리부터 차례로 비교한다. 298과 302는 십의 자리가 9와 0으로 다르므로 298이 더 작다."],
+  ["activity","자리값 표 만들기","백·십·일 칸이 있는 표에 수 모형을 놓아 본다. 305처럼 십의 자리가 0인 수는 '십의 자리가 비어 있다'와 연결한다. 두 수를 나란히 놓고 어느 자리가 다른지 찾는 활동이 수 비교의 기초다."],
+  ["practice","수직선으로 위치 잡기","수직선에 0, 100, 200, 300을 표시하고 150을 어디쯤 놓을지 짐작하게 한다. 어림으로 위치를 잡는 것이 자리값 감각을 기른다. 큰 수 읽기(천, 만 단위)는 네 자리씩 끊어 읽는 습관을 붙인다."],
+  ["errors","흔한 오류","자리에 0이 있는 수(305, 2004)를 읽거나 쓸 때 자리를 빠뜨리는 실수가 잦다. 비교할 때 뒷자리만 보고 판단하는 오류(99>100이라고 하는 경우)도 있다. 항상 맨 위 자리부터 비교하는 순서를 말로 연습시킨다."]],
  fractions:[
   ["concept","전체와 부분","분수는 전체를 크기가 같은 부분으로 나누었을 때 그중 몇 부분인지 나타내는 수다. 분모는 전체를 같게 나눈 부분의 수, 분자는 선택한 부분의 수다. 종이 한 장을 같은 크기로 8등분하고 3부분을 칠하면 전체의 3/8이다. 서로 다른 크기로 나누면 조각 수만 세어 분수를 정할 수 없다."],
   ["activity","종이 띠로 분수 만들기","같은 길이의 종이 띠를 접어 크기가 같은 부분을 만든다. 4등분한 띠에서 1부분, 8등분한 띠에서 2부분을 칠해 겹치면 1/4과 2/8의 크기가 같다. 분수를 비교할 때에는 먼저 전체의 크기가 같은지 확인한다. 분모가 같은 분수에서는 분자가 클수록 선택한 부분이 많다."],
-  ["practice","분수 문제와 설명 확인","전체를 8등분한 그림에서 3부분을 칠했을 때 분수는 3/8이며 칠하지 않은 부분은 5/8이다. 8부분 중 3부분을 골랐다는 말로 설명하게 한다. 분모가 8로 같을 때 5/8은 3/8보다 크다. 확인 질문: 전체가 같은가? 같은 크기로 나누었는가? 분모와 분자가 각각 무엇을 뜻하는가?"]],
+  ["practice","분수 문제와 설명 확인","전체를 8등분한 그림에서 3부분을 칠했을 때 분수는 3/8이며 칠하지 않은 부분은 5/8이다. 8부분 중 3부분을 골랐다는 말로 설명하게 한다. 분모가 8로 같을 때 5/8은 3/8보다 크다. 확인 질문: 전체가 같은가? 같은 크기로 나누었는가? 분모와 분자가 각각 무엇을 뜻하는가?"],
+  ["errors","흔한 오류","전체 크기가 다르면 나눈 조각 수만 비교할 수 없다는 점을 놓친다(피자 4조각 중 1조각과 쿠키 8조각 중 1조각). 분자를 '위에 있는 수'로만 외우면 의미를 모른 채 푼다. '전체를 똑같이 몇 부분?'과 '몇 부분 골랐나?' 두 질문을 습관화한다."]],
  addition:[
   ["concept","자리값과 받아올림","덧셈은 두 양을 합쳐 전체를 구하는 계산이다. 세로셈에서는 일의 자리끼리, 십의 자리끼리처럼 같은 자리값을 맞춘다. 같은 자리의 합이 10 이상이면 10개를 그다음 자리의 1개로 바꾼다. 이것이 받아올림이다. 146+78은 224이다."],
   ["activity","수 모형으로 합 만들기","일의 자리 막대 10개를 십의 자리 묶음 1개로 바꾸어 본다. 146에 78을 더하면 일의 자리 6+8=14에서 4를 쓰고 십의 자리로 1을 올린다. 십의 자리 4+7+1=12에서 2를 쓰고 백의 자리로 1을 올려 합이 224가 된다."],
-  ["practice","어림과 역산으로 확인","합을 구하기 전 각 수를 가까운 십 또는 백으로 어림하여 결과 범위를 예상한다. 146+78=224를 확인하려면 224-78=146을 계산한다. 예상한 범위와 실제 결과가 크게 다르면 자리 맞춤이나 받아올림을 다시 확인한다. 정답뿐 아니라 계산 과정을 말로 설명한다."]],
+  ["practice","어림과 역산으로 확인","합을 구하기 전 각 수를 가까운 십 또는 백으로 어림하여 결과 범위를 예상한다. 146+78=224를 확인하려면 224-78=146을 계산한다. 예상한 범위와 실제 결과가 크게 다르면 자리 맞춤이나 받아올림을 다시 확인한다. 정답뿐 아니라 계산 과정을 말로 설명한다."],
+  ["errors","흔한 오류","자리를 맞추지 않고 쓰는 실수(146+78을 왼쪽 맞춤으로 쓰기)와 받아올림 숫자를 더하지 않는 실수가 잦다. 받아올림한 1을 세로셈 위에 작게 쓰는 습관, 그리고 '검산으로 확인'을 매번 하게 한다."]],
  subtraction:[
   ["concept","차와 받아내림","뺄셈은 덜어 낸 뒤 남는 양 또는 두 양의 차를 구한다. 같은 자리값끼리 계산한다. 빼야 할 수가 더 크면 바로 위 자리의 1을 현재 자리의 10으로 바꾼다. 302-178은 124이다. 0이 있는 자리에서는 먼저 더 높은 자리에서 차례대로 바꾸어야 한다."],
   ["activity","묶음 바꾸기","302를 백 모형 3개와 일 모형 2개로 나타낸다. 백 모형 하나를 십 모형 10개로 바꾸고 그중 십 모형 하나를 일 모형 10개로 바꾸면 백 2개, 십 9개, 일 12개가 된다. 여기서 178을 빼면 백 1개, 십 2개, 일 4개가 남는다."],
-  ["practice","덧셈으로 뺄셈 검산","302-178=124의 검산은 124+178=302이다. 차에 뺀 수를 더해 처음 수가 되는지 확인한다. 자릿수가 다른 수를 세로로 쓸 때도 오른쪽 일의 자리를 맞춘다. 0을 지나는 받아내림에서 바뀐 십의 자리 값을 빠뜨리지 않도록 확인한다."]],
+  ["practice","덧셈으로 뺄셈 검산","302-178=124의 검산은 124+178=302이다. 차에 뺀 수를 더해 처음 수가 되는지 확인한다. 자릿수가 다른 수를 세로로 쓸 때도 오른쪽 일의 자리를 맞춘다. 0을 지나는 받아내림에서 바뀐 십의 자리 값을 빠뜨리지 않도록 확인한다."],
+  ["errors","흔한 오류","0을 지나는 받아내림에서 바로 위 자리만 줄이고 더 위 자리 처리를 빠뜨린다. 큰 수에서 작은 수를 빼야 하는데 위아래를 바꾸어 쓰는 경우도 있다. 수 모형으로 묶음 바꾸기를 한 번 더 손으로 해 보는 것이 가장 효과적이다."]],
  multiplication:[
   ["concept","같은 묶음의 반복","곱셈은 같은 크기의 묶음이 여러 개일 때 전체를 구하는 계산이다. 한 묶음에 6개씩 있고 묶음이 4개라면 6×4=24이다. 이를 6+6+6+6과 연결한다. 배열의 행과 열을 바꾸어 보며 6×4와 4×6의 결과가 같음을 확인할 수 있다."],
   ["activity","배열과 분배","바둑돌을 직사각형 배열로 놓아 같은 묶음을 보이게 한다. 12×4는 10×4와 2×4로 나누어 40+8=48로 구할 수 있다. 두 자리 수의 곱셈에서도 수를 자리값대로 나눈 뒤 부분의 곱을 더한다. 배열을 두 부분으로 나누어 계산 과정과 연결한다."],
-  ["practice","곱셈을 말과 식으로","한 봉지에 6개씩 든 물건을 4봉지 준비하면 모두 24개다. 한 묶음의 수와 묶음 수가 무엇인지 말하게 한다. 12×4=48의 답은 48÷4=12로 확인할 수 있다. 곱셈식만 외우기보다 그림과 반복 덧셈, 나눗셈을 연결한다."]],
+  ["practice","곱셈을 말과 식으로","한 봉지에 6개씩 든 물건을 4봉지 준비하면 모두 24개다. 한 묶음의 수와 묶음 수가 무엇인지 말하게 한다. 12×4=48의 답은 48÷4=12로 확인할 수 있다. 곱셈식만 외우기보다 그림과 반복 덧셈, 나눗셈을 연결한다."],
+  ["errors","흔한 오류","구구단을 외우기만 해서 '몇 개씩'과 '몇 묶음'이 뒤바뀐다. 두 자리 곱셈에서 자리값 분배(12×4=10×4+2×4)를 모르면 곱셈 두 자리에서 막힌다. 배열 그림을 먼저 그려 보게 한다."]],
  division:[
   ["concept","똑같이 나누기","나눗셈은 같은 수씩 나누어 주거나 같은 크기의 묶음으로 나누는 계산이다. 24개를 6곳에 똑같이 나누면 한 곳에 4개씩이다. 24개를 6개씩 묶으면 4묶음이다. 같은 식 24÷6=4라도 문제에서 묻는 양이 무엇인지 확인한다."],
   ["activity","나머지 직접 세기","물건 26개를 6개씩 묶으면 4묶음이 되고 2개가 남는다. 26÷6의 몫은 4, 나머지는 2다. 나머지는 나누는 수보다 작아야 한다. 남은 것이 6개 이상이면 한 묶음을 더 만들 수 있기 때문이다. 묶음 그림으로 몫과 나머지를 구별한다."],
-  ["practice","곱셈과 덧셈으로 검산","나눗셈은 나누는 수×몫+나머지=나누어지는 수로 검산한다. 26÷6에서 6×4+2=26이다. 나머지가 나누는 수보다 작고 0 이상인지도 확인한다. 남은 물건을 더 나누어도 되는지는 문제의 상황과 단위를 확인한 후 판단한다."]],
+  ["practice","곱셈과 덧셈으로 검산","나눗셈은 나누는 수×몫+나머지=나누어지는 수로 검산한다. 26÷6에서 6×4+2=26이다. 나머지가 나누는 수보다 작고 0 이상인지도 확인한다. 남은 물건을 더 나누어도 되는지는 문제의 상황과 단위를 확인한 후 판단한다."],
+  ["errors","흔한 오류","몫과 나머지를 뒤바꾸거나 나머지가 나누는 수보다 큰 답을 그대로 쓴다(26÷6=3 나머지 8). '나머지는 나누는 수보다 작아야 한다'를 묶음 그림에서 확인하는 것이 포인트다."]],
+ writing:[
+  ["concept","띄어쓰기와 문장 성분","띄어쓰기의 기본은 '낱말과 낱말 사이'를 띄우는 것이다. 초등 저학년은 조사와 어미를 떼어 쓰는 실수가 많다. '날씨가/ 좋아요'처럼 읽어 보며 붙여 쓸 부분과 띄울 부분을 소리로 구분하게 한다."],
+  ["activity","받아쓰기와 고쳐쓰기","짧은 문장을 받아쓰기한 뒤 스스로 모범 문장과 비교하게 한다. 틀린 곳을 지우기보다 옆에 바르게 다시 쓰게 한다. 띄어쓰기·맞춤법 오류를 한꺼번에 고치지 말고 하루에 한 가지씩만 집중한다."],
+  ["practice","문장 다듬기 연습","쓴 문장을 소리 내어 읽게 하고 '숨이 쉬어지는가, 뜻이 통하는가'를 확인한다. 어미 '~했다' 반복이면 한 곳만 다르게 바꿔 보는 연습을 한다. 칭찬할 부분을 먼저 짚고 고칠 곳은 하나만 고른다."],
+  ["errors","흔한 오류","받침 소리나는 대로 쓰기(먹는대→먹는데), 조사 띄어쓰기, 문장 부호 빠뜨리기가 잦다. 틀린 글자만 고쳐 쓰게 하기보다 문장 전체를 다시 쓰게 하는 편이 정착이 빠르다."]],
+ emotion:[
+  ["concept","학습 회피와 자신감","기초가 부족한 아이는 '몰라요'라고 먼저 말하는 것을 배운다. 이는 태도 문제가 아니라 실패 경험의 반복이다. 작은 성공을 의도적으로 만들어 주는 것이 지도의 출발점이다. 수업 목표를 아이가 확실히 아는 수준에서 시작한다."],
+  ["activity","성공 경험 쌓기","오늘 배울 내용보다 한 단계 쉬운 문제로 시작해 '할 수 있다'를 확인하게 한다. 칭찬은 '잘했어' 대신 '막힌 데에서 다시 했네'처럼 과정을 콕 짚어 한다. 틀려도 되는 분위기를 약속으로 정해 둔다."],
+  ["practice","동기 점검 질문","수업 전 '오늘 기분은 몇 점?' 같은 간단한 체크로 상태를 본다. 무기력이 이어지면 진도를 낮추고 성취 기록을 시각화(스티커·그래프)한다. 지속적 무기력·불안은 담당 교사와 상의할 사안이다."]],
+ parent:[
+  ["concept","가정 연계의 기본","학부모 소통은 사실 전달이 먼저다. '오늘 나눗셈 묶음 활동을 했고, 나머지 개념에 관심을 보였어요'처럼 구체적인 관찰을 전한다. 판단·평가 표현(우리 아이가 뒤처져요)보다 아이가 한 행동과 앞으로 할 일을 말한다."],
+  ["activity","가정에서 할 수 있는 것","집에서 소리 내어 읽기 10분, 물건 나누어 보기처럼 부담 없는 활동을 제안한다. 숙제 형태의 지시보다 '함께 해 보실 만한 것'으로 안내한다. 아이 앞에서의 비교·야단은 피하라고 부드럽게 전한다."],
+  ["practice","상담 기록과 전달","상담 내용은 정해진 절차로만 기록·공유한다. 개인 연락처 교환, 개인 SNS 소통은 하지 않는다. 민감한 내용(가정환경, 건강)은 담당 교사에게 먼저 전달하고 함께 판단한다."]],
+ resource:[
+  ["concept","공식 보정 자료를 찾는 곳","이 앱의 시연 자료 외에, 시·도교육청이 운영하는 '기초학력 진단-보정 시스템'에서 3R's 검사와 영역별 보정학습자료를 내려받을 수 있다. 교사 계정으로 로그인 후 학생별 맞춤 자료를 배포하는 방식이다."],
+  ["activity","온채움 등 종합지원시스템","온채움(충남 등 일부 교육청)은 학습수준과 학습저해요인(인지·정서·행동)을 함께 진단하고 출발점을 제시한다. 누가기록·성장보고서 기능이 있어 담임·학부모와 공유할 때 참고할 수 있다."],
+  ["practice","이 앱과 함께 쓰는 법","공식 시스템의 진단 결과를 이 앱의 수업안·연습문제와 연결한다. 예: 진단에서 '나눗셈 나머지'가 부족으로 나오면 다온에서 나눗셈 주제 수업안을 만들고 확인 문제를 쓴다. 공식 자료는 항상 원문을 그대로 확인하세요."]],
  reading:[
   ["concept","소리 내어 읽기와 유창성","읽기 지도의 시작은 아이가 소리 내어 읽는 것을 듣는 것이다. 모르는 낱말에서 멈추는 곳, 되돌아 읽는 곳을 표시해 두면 도움이 필요한 부분이 보인다. 짧은 문장부터 정확하게 읽고, 익숙해지면 속도보다 끊어 읽는 위치와 억양을 함께 봐 준다."],
   ["activity","낱말 카드와 문장 찾기","글에 나온 낱말 중 어려운 것 3~5개를 카드로 만들어 뜻을 함께 짐작해 본다. 낱말을 문맥 속에서 다시 찾아 읽어 보면 단어 암기가 아니라 이해와 연결된다. 모르는 낱말을 추측한 근거를 말로 설명하게 한다."],
@@ -307,7 +426,7 @@ const CONTENT = {
 const DOCUMENTS = [];
 for (const t of TOPICS){
   DOCUMENTS.push({
-    document_id:`DEMO-${t.id.toUpperCase()}-001`, title:`${t.title} · 자체 작성 활동 자료`,
+    document_id:`DEMO-${t.id.toUpperCase()}-001`, title:`${t.title} · ${t.area} · 자체 작성 자료`,
     topic:t.id, grade:"3~5학년 시연용", author:AUTHOR, disclaimer:DISCLAIMER,
     chunks: CONTENT[t.id].map(([sec, head, text], i) => ({ chunk_id:`DEMO-${t.id.toUpperCase()}-${String(i+1).padStart(2,"0")}`, section:sec, heading:head, text })),
   });
@@ -348,7 +467,7 @@ function search(query, topic = null, limit = 4){
 }
 
 /* ═══════════════════ 4. 수업 생성기 (결정적 · 정답은 계산기로 검증) ═══════════════════ */
-const TOPIC_KW = { fractions:["분수","분모","분자","통분"], addition:["덧셈","더하기","받아올림","자리값"], subtraction:["뺄셈","빼기","받아내림"], multiplication:["곱셈","곱하기","구구","배열"], division:["나눗셈","나누기","나머지","몫"], reading:["읽기","낭독","어휘","낱말","독해","글 읽"], mentoring:["멘토","첫만남","첫 만남","개인정보","안전","칭찬","관계","수칙"] };
+const TOPIC_KW = { number:["자리값","수 비교","수의 크기","수직선","어림","큰 수"], fractions:["분수","분모","분자","통분"], addition:["덧셈","더하기","받아올림","자리값 맞"], subtraction:["뺄셈","빼기","받아내림"], multiplication:["곱셈","곱하기","구구","배열"], division:["나눗셈","나누기","나머지","몫"], reading:["읽기","낭독","어휘","낱말","독해","글 읽","유창"], writing:["쓰기","받아쓰기","띄어쓰기","맞춤법","문장","글쓰기"], emotion:["자신감","동기","정서","불안","무기력","회피","못하겠","칭찬","의욕"], mentoring:["멘토","첫만남","첫 만남","개인정보","안전","관계","수칙"], parent:["학부모","부모","가정","상담","안내문","연락"], resource:["보정","진단","온채움","기초학력","교육청","공식 자료","성취기준","교육과정"] };
 function detectTopic(text){
   const excl = /(\S+)\s*(?:말고|빼고|제외하고?|아니고|대신)/g; let m; const excluded = new Set();
   while ((m = excl.exec(text))) for (const [id,kws] of Object.entries(TOPIC_KW)) if (kws.some(k => m[1].includes(k))) excluded.add(id);
@@ -358,53 +477,84 @@ function detectTopic(text){
 const GRADE_NO = /([345])\s*학년/;
 const MIN_NO = /(20|40|60)\s*분/;
 function makeQuiz(topic, grade){
-  const item = (i, q, a, ex) => ({ id:`q${i}`, q, a:String(a), ex });
+  const item = (i, q, a, ex, hints) => ({ id:`q${i}`, q, a:String(a), ex, hints:hints || [] });
+  if (topic === "number"){
+    const [a,b] = {3:[298,302],4:[3050,3005],5:[12004,10240]}[grade];
+    return [
+      item(1, `${a}과 ${b} 중 더 큰 수를 고르고, 그 이유를 자리값으로 설명해 보세요.`, Math.max(a,b), `맨 위 자리부터 차례로 비교합니다.`, ["자리값 표에 각 수를 써 보세요","맨 위 자리(천/백)부터 비교해 보세요","어느 자리에서 처음 달라지나요?"]),
+      item(2, `${a}을 자리값별로 나누어 말해 보세요. (예: 305 = 백 3, 십 0, 일 5)`, `자리값별로 나누어 말하기`, `비어 있는 자리(0)도 '비어 있다'로 표시합니다. ${a}의 각 자리 수를 표에 놓아 보세요.`, ["수를 자리값 표에 놓아 보세요","0이 있는 자리도 '비어 있다'로 써 보세요"]),
+      item(3, `수직선에서 ${Math.min(a,b)}과 ${Math.max(a,b)}의 사이 중간쯤에는 어떤 수가 올까요?`, `약 ${(a+b)/2} 근처`, `정답보다 '어느 사이에 있는지' 위치 감각이 중요합니다.`, ["수직선에 두 수를 먼저 표시해 보세요","가운데가 어디쯤인지 어림해 보세요"])];
+  }
   if (topic === "fractions"){
     const d = {3:8, 4:10, 5:12}[grade], n = {3:3, 4:3, 5:5}[grade];
     return [
-      item(1, `종이 한 장을 같은 크기로 ${d}등분하고 ${n}부분을 칠했습니다. 칠한 부분은 전체의 얼마인가요?`, `${n}/${d}`, `전체를 나눈 수 ${d}가 분모, 칠한 부분 수 ${n}가 분자입니다.`),
-      item(2, `같은 종이에서 칠하지 않은 부분은 전체의 얼마인가요?`, `${d-n}/${d}`, `전체 ${d}부분에서 칠한 ${n}부분을 빼면 ${d-n}부분입니다.`),
-      item(3, `크기가 같은 전체에서 ${n}/${d}와 ${n+2}/${d} 중 더 큰 분수를 고르세요.`, `${n+2}/${d}`, `분모가 같으면 분자가 큰 분수가 큽니다.`)];
+      item(1, `종이 한 장을 같은 크기로 ${d}등분하고 ${n}부분을 칠했습니다. 칠한 부분은 전체의 얼마인가요?`, `${n}/${d}`, `전체를 나눈 수 ${d}가 분모, 칠한 부분 수 ${n}가 분자입니다.`, [`전체를 똑같이 몇 부분으로 나눴는지 세어 보세요`,`칠한 부분이 몇 부분인지 세어 보세요`,`나눈 수는 아래(분모), 칠한 수는 위(분자)에 씁니다`]),
+      item(2, `같은 종이에서 칠하지 않은 부분은 전체의 얼마인가요?`, `${d-n}/${d}`, `전체 ${d}부분에서 칠한 ${n}부분을 빼면 ${d-n}부분입니다.`, [`전체가 몇 부분으로 나눠져 있나요?`,`칠하지 않은 부분을 직접 세어 보세요`]),
+      item(3, `크기가 같은 전체에서 ${n}/${d}와 ${n+2}/${d} 중 더 큰 분수를 고르세요.`, `${n+2}/${d}`, `분모가 같으면 분자가 큰 분수가 큽니다.`, [`두 분수의 분모(아래 수)가 같은지 확인해 보세요`,`분모가 같으면 위(분자)가 큰 쪽이 큽니다`])];
   }
   if (topic === "addition"){
     const [a,b] = {3:[146,78],4:[1468,757],5:[12468,7757]}[grade];
     return [
-      item(1, `${a} + ${b} = ?`, a+b, `같은 자리끼리 더하고 10 이상이면 받아올림합니다.`),
-      item(2, `${a+b}에서 ${b}를 빼면 얼마인가요? 덧셈 검산과 연결해 보세요.`, a, `${a+b} - ${b} = ${a}입니다.`),
-      item(3, `도서 ${a}권에 ${b}권을 더하고 다시 10권을 더했습니다. 모두 몇 권인가요?`, `${a+b+10}권`, `${a} + ${b} + 10 = ${a+b+10}입니다.`)];
+      item(1, `${a} + ${b} = ?`, a+b, `같은 자리끼리 더하고 10 이상이면 받아올림합니다.`, [`일의 자리끼리 먼저 더해 보세요: ${a%10} + ${b%10}`, `10이 넘으면 십의 자리로 받아올림하세요`]),
+      item(2, `${a+b}에서 ${b}를 빼면 얼마인가요? 덧셈 검산과 연결해 보세요.`, a, `${a+b} - ${b} = ${a}입니다.`, [`합에서 더한 수를 빼면 어떤 수가 남을까요?`,`덧셈의 검산은 뺄셈입니다`]),
+      item(3, `도서 ${a}권에 ${b}권을 더하고 다시 10권을 더했습니다. 모두 몇 권인가요?`, `${a+b+10}권`, `${a} + ${b} + 10 = ${a+b+10}입니다.`, [`먼저 ${a} + ${b}만 계산해 보세요`,`거기에 10을 더하면 됩니다`])];
   }
   if (topic === "subtraction"){
     const [a,b] = {3:[302,178],4:[2003,786],5:[12003,6786]}[grade];
     return [
-      item(1, `${a} - ${b} = ?`, a-b, `자리를 맞춘 뒤 필요한 자리에서 받아내림합니다.`),
-      item(2, `${a-b} + ${b} = ? 뺄셈의 답을 확인해 보세요.`, a, `차에 뺀 수를 더하면 처음 수 ${a}가 됩니다.`),
-      item(3, `색종이 ${a}장 중 ${b}장을 쓰고 10장을 더 썼습니다. 몇 장이 남나요?`, `${a-b-10}장`, `${a} - ${b} - 10 = ${a-b-10}입니다.`)];
+      item(1, `${a} - ${b} = ?`, a-b, `자리를 맞춘 뒤 필요한 자리에서 받아내림합니다.`, [`일의 자리 ${a%10} - ${b%10}이 되나요? 모자라면 받아내림`, `윗자리 1을 이 자리의 10으로 바꿔 보세요`]),
+      item(2, `${a-b} + ${b} = ? 뺄셈의 답을 확인해 보세요.`, a, `차에 뺀 수를 더하면 처음 수 ${a}가 됩니다.`, [`뺄셈의 검산은 덧셈입니다`,`차에 뺀 수를 더해 보세요`]),
+      item(3, `색종이 ${a}장 중 ${b}장을 쓰고 10장을 더 썼습니다. 몇 장이 남나요?`, `${a-b-10}장`, `${a} - ${b} - 10 = ${a-b-10}입니다.`, [`먼저 ${a} - ${b}만 계산해 보세요`,`그 결과에서 10을 빼면 됩니다`])];
   }
   if (topic === "multiplication"){
     const [a,b] = {3:[6,4],4:[12,4],5:[24,6]}[grade];
     return [
-      item(1, `한 봉지에 ${a}개씩 든 블록이 ${b}봉지 있습니다. 모두 몇 개인가요?`, `${a*b}개`, `${a}개씩 ${b}묶음이므로 ${a} × ${b} = ${a*b}입니다.`),
-      item(2, `${a} × ${b+1} = ?`, a*(b+1), `${a} × ${b} = ${a*b}에 한 묶음 ${a}를 더하면 ${a*(b+1)}입니다.`),
-      item(3, `${a*b} ÷ ${b} = ? 곱셈과 연결해 보세요.`, a, `${a} × ${b} = ${a*b}이므로 ${a*b} ÷ ${b} = ${a}입니다.`)];
+      item(1, `한 봉지에 ${a}개씩 든 블록이 ${b}봉지 있습니다. 모두 몇 개인가요?`, `${a*b}개`, `${a}개씩 ${b}묶음이므로 ${a} × ${b} = ${a*b}입니다.`, [`몇 개씩? 몇 묶음인지 문제에서 찾아 보세요`,`${a}를 ${b}번 더해 보세요`]),
+      item(2, `${a} × ${b+1} = ?`, a*(b+1), `${a} × ${b} = ${a*b}에 한 묶음 ${a}를 더하면 ${a*(b+1)}입니다.`, [`${a} × ${b}가 얼마인지 먼저 구해 보세요`,`묶음이 하나 더 있으면 ${a}를 더하면 됩니다`]),
+      item(3, `${a*b} ÷ ${b} = ? 곱셈과 연결해 보세요.`, a, `${a} × ${b} = ${a*b}이므로 ${a*b} ÷ ${b} = ${a}입니다.`, [`${a} × ${b} = ${a*b}를 먼저 확인해 보세요`,`곱셈의 검산은 나눗셈입니다`])];
   }
   if (topic === "division"){
     const [a,b] = {3:[26,6],4:[53,7],5:[149,12]}[grade];
     const { q, r } = divParts(BigInt(a), BigInt(b));
     return [
-      item(1, `블록 ${a}개를 ${b}개씩 묶습니다. 몇 묶음이고 몇 개가 남나요?`, `몫 ${q}, 나머지 ${r}`, `${b} × ${q} = ${b*Number(q)}이고 ${a} - ${b*Number(q)} = ${r}. 나머지는 나누는 수보다 작습니다.`),
-      item(2, `${b} × ${q} + ${r} = ? 나눗셈의 답을 확인해 보세요.`, a, `나누는 수 × 몫 + 나머지 = 처음 수이므로 ${a}입니다.`),
-      item(3, `블록 ${b*Number(q)}개를 ${b}개씩 묶으면 몇 묶음이고 몇 개가 남나요?`, `몫 ${q}, 나머지 0`, `${b} × ${q} = ${b*Number(q)}이므로 남는 것 없이 ${q}묶음입니다.`)];
+      item(1, `블록 ${a}개를 ${b}개씩 묶습니다. 몇 묶음이고 몇 개가 남나요?`, `몫 ${q}, 나머지 ${r}`, `${b} × ${q} = ${b*Number(q)}이고 ${a} - ${b*Number(q)} = ${r}. 나머지는 나누는 수보다 작습니다.`, [`${b}개씩 묶음을 그려 보세요`,`${b}의 몇 배까지 ${a} 안에 들어가나요? ${b}×${q}=${b*Number(q)}`,`남은 것은 ${a} - ${b*Number(q)}`]),
+      item(2, `${b} × ${q} + ${r} = ? 나눗셈의 답을 확인해 보세요.`, a, `나누는 수 × 몫 + 나머지 = 처음 수이므로 ${a}입니다.`, [`나누는 수 × 몫을 먼저 계산하세요`,`거기에 나머지를 더하면 처음 수가 돼야 합니다`]),
+      item(3, `블록 ${b*Number(q)}개를 ${b}개씩 묶으면 몇 묶음이고 몇 개가 남나요?`, `몫 ${q}, 나머지 0`, `${b} × ${q} = ${b*Number(q)}이므로 남는 것 없이 ${q}묶음입니다.`, [`${b} × ${q}가 얼마인지 먼저 구해 보세요`,`딱 맞아떨어지면 나머지는 0입니다`])];
   }
   if (topic === "reading"){
     return [
-      item(1, `짧은 글을 소리 내어 읽고, 멈추거나 되돌아 읽은 곳을 스스로 표시해 보세요.`, `(표시 확인)`, `멈춘 곳이 도움이 필요한 낱말·어구입니다. 그 부분만 다시 같이 읽어 보세요.`),
-      item(2, `글에서 모르는 낱말 3개를 골라 문맥으로 뜻을 짐작하고, 짐작한 근거를 말해 보세요.`, `(근거 설명)`, `뜻을 가르치기보다 어떻게 알았는지 말하게 하는 것이 핵심입니다.`),
-      item(3, `읽은 단락을 '누가 · 무엇을 · 어떻게' 순서로 자기 말로 설명해 보세요.`, `(세 요소 포함)`, `빠진 요소가 있으면 해당 문장을 다시 찾아 함께 읽습니다.`)];
+      item(1, `짧은 글을 소리 내어 읽고, 멈추거나 되돌아 읽은 곳을 스스로 표시해 보세요.`, `(표시 확인)`, `멈춘 곳이 도움이 필요한 낱말·어구입니다. 그 부분만 다시 같이 읽어 보세요.`, [`모르는 낱말에서 멈춘 곳을 찾아 보세요`,`그 문장만 다시 읽어 보세요`]),
+      item(2, `글에서 모르는 낱말 3개를 골라 문맥으로 뜻을 짐작하고, 짐작한 근거를 말해 보세요.`, `(근거 설명)`, `뜻을 가르치기보다 어떻게 알았는지 말하게 하는 것이 핵심입니다.`, [`그 낱말 앞뒤 문장을 다시 읽어 보세요`,`'아마 ~라는 뜻인 것 같아요'로 시작해 보세요`]),
+      item(3, `읽은 단락을 '누가 · 무엇을 · 어떻게' 순서로 자기 말로 설명해 보세요.`, `(세 요소 포함)`, `빠진 요소가 있으면 해당 문장을 다시 찾아 함께 읽습니다.`, [`누가 했나요? 무엇을 했나요? 어떻게 했나요?`,`세 가지를 한 문장씩 말해 보세요`])];
+  }
+  if (topic === "writing"){
+    return [
+      item(1, `'날씨가좋아서 공원에갔다' — 띄어쓰기가 틀린 곳을 찾아 고쳐 보세요.`, `날씨가 좋아서 공원에 갔다`, `낱말과 낱말 사이를 띄웁니다. 소리 내어 읽으며 끊기는 곳을 찾아 보세요.`, [`문장을 소리 내어 읽어 보세요`,`낱말 사이에서 숨 쉬는 곳을 찾아 보세요`]),
+      item(2, `받아쓰기할 때 '먹는대로'를 '먹는데로'라고 썼습니다. 어느 부분이 틀렸나요?`, `먹는대로 (소리: 먹는대)`, `'~대로'는 '하는 대로'의 뜻. 소리나는 대로 쓰면 '먹는데로'로 쓰기 쉽습니다.`, [`소리를 그대로 쓰면 어떻게 되나요?`,`'~하는 대로'라는 뜻인지 확인해 보세요`]),
+      item(3, `오늘 쓴 문장 하나를 골라 소리 내어 읽고 '숨이 쉬어지는가, 뜻이 통하는가'를 확인해 보세요.`, `(직접 확인)`, `스스로 읽어 보며 고칠 곳을 찾는 것이 다듬기의 첫걸음입니다.`, [`소리 내어 읽어 보세요`,`이상한 곳에 밑줄을 그어 보세요`])];
+  }
+  if (topic === "emotion"){
+    return [
+      item(1, `아이가 "못하겠어요"라고 할 때 멘토의 좋은 다음 말은? ① 그래도 해봐 ② 한 단계 쉬운 문제로 바꿔서 같이 해보자`, `②`, `실패 경험이 반복된 아이에게는 작은 성공이 먼저입니다.`, [`아이가 포기한 이유가 뭘까요?`,`확실히 할 수 있는 쉬운 문제부터 시작해 보세요`]),
+      item(2, `칭찬할 때 '잘했어'보다 더 좋은 방법은 무엇일까요?`, `과정을 구체적으로 짚는 칭찬 (예: 막힌 데에서 다시 했네)`, `구체적 칭찬이 '무엇을 잘했는지'를 알게 해 줍니다.`, [`아이가 방금 한 행동을 말로 적어 보세요`,`그 행동 중 좋은 점 하나만 콕 짚어 보세요`]),
+      item(3, `수업 전 아이 상태를 보는 간단한 방법 하나를 적어 보세요.`, `(예: 오늘 기분 몇 점? 물어보기)`, `기분 체크로 수업 난이도·속도를 조절합니다.`, [`아이 오늘 표정이 어땠나요?`,`한 가지 질문으로 기분을 물어보세요`])];
+  }
+  if (topic === "parent"){
+    return [
+      item(1, `학부모에게 전할 때 '오늘 뭐 했어요'보다 좋은 전달법은?`, `구체적 관찰 (예: 나눗셈 묶음 활동을 했고 나머지 개념에 관심을 보였어요)`, `판단·평가보다 관찰한 행동과 앞으로 할 일을 말합니다.`, [`오늘 아이가 한 구체적 행동을 적어 보세요`,`'~했어요'가 아니라 '~하는 모습이었어요'로 말해 보세요`]),
+      item(2, `가정에서 부모님이 할 수 있는 부담 없는 활동 하나는?`, `(예: 소리 내어 읽기 10분)`, `숙제 지시보다 '함께 해 볼 만한 것'으로 안내합니다.`, [`오늘 수업에서 한 활동을 집에서도 할 수 있게 바꿔 보세요`]),
+      item(3, `민감한 내용(가정환경·건강)은 누구와 먼저 상의해야 하나요?`, `담당 교사·센터`, `개인 판단으로 전달하지 말고 담당 교사와 함께 판단합니다.`, [`이 내용을 멘토 혼자 판단해도 되는 문제인가요?`])];
+  }
+  if (topic === "resource"){
+    return [
+      item(1, `기초학력 진단-보정 시스템에서 가져올 수 있는 것은 무엇인가요?`, `3R's 검사 결과와 영역별 보정학습자료`, `교사 계정으로 로그인해 학생별 자료를 배포·다운로드합니다.`, [`교육청 공식 시스템 이름을 기억하세요`,`학생의 부족 영역이 무엇인지 먼저 확인해 보세요`]),
+      item(2, `진단에서 '나눗셈 나머지'가 부족으로 나왔을 때 다온에서 무엇을 하면 되나요?`, `나눗셈 주제 수업안·연습문제 생성`, `진단 결과 → 다온 주제 선택 → 수업 진행 순서로 연결합니다.`, [`어떤 주제를 골라야 하나요?`,`다온의 나눗셈 자료와 연결해 보세요`]),
+      item(3, `공식 자료와 이 앱의 시연 자료 중 우선 확인해야 할 것은?`, `공식 자료 원문`, `시연 자료는 참고용이고 공식 자료가 기준입니다.`, [`자료의 출처가 공식인지 시연인지 확인하세요`])];
   }
   return [
-    item(1, `첫 만남에서 아이에게 물어볼 '좋아하는 것' 질문을 2개 적어 보세요.`, `(멘토 답)`, `관계 형성이 진도보다 먼저입니다.`),
-    item(2, `아이가 "모르겠어요"라고 할 때 멘토의 다음 말로 좋은 것은? ① 답을 알려준다 ② 문제를 더 작은 질문으로 나눈다`, `②`, `스스로 해낸 경험을 쌓는 것이 목표입니다.`),
-    item(3, `수업 중 알게 된 학생의 연락처를 내 휴대폰에 저장해도 되나요?`, `아니요`, `개인정보는 정해진 양식·절차로만 다룹니다.`)];
+    item(1, `첫 만남에서 아이에게 물어볼 '좋아하는 것' 질문을 2개 적어 보세요.`, `(멘토 답)`, `관계 형성이 진도보다 먼저입니다.`, [`아이가 좋아하는 것을 떠올려 보세요`,`열린 질문으로 물어보세요`]),
+    item(2, `아이가 "모르겠어요"라고 할 때 멘토의 다음 말로 좋은 것은? ① 답을 알려준다 ② 문제를 더 작은 질문으로 나눈다`, `②`, `스스로 해낸 경험을 쌓는 것이 목표입니다.`, [`아이가 어디서 막혔는지 생각해 보세요`,`문제를 더 작게 나눠 보세요`]),
+    item(3, `수업 중 알게 된 학생의 연락처를 내 휴대폰에 저장해도 되나요?`, `아니요`, `개인정보는 정해진 양식·절차로만 다룹니다.`, [`개인정보 수칙을 떠올려 보세요`])];
 }
 function makePlan(grade, topic, minutes, goal){
   const meta = TOPICS.find(t => t.id === topic);
@@ -417,9 +567,14 @@ function makePlan(grade, topic, minutes, goal){
     subtraction:["수 모형으로 처음 수를 만들고 빼야 할 수를 덜어 내 보세요.","0을 지나는 받아내림은 한 단계씩 묶음을 바꾸며 설명해 주세요."],
     multiplication:["같은 수의 블록 묶음을 여러 개 만들고 반복 덧셈을 써 보세요.","반복 덧셈을 곱셈식과 연결하고 배열을 나누어 계산하는 방법도 보여 주세요."],
     division:["블록을 같은 수씩 묶으며 묶음 수와 남은 블록을 구별해 주세요.","나머지가 나누는 수보다 작아야 하는 이유를 실제 묶음으로 확인해 주세요."],
+    number:["자리값 표에 수를 놓고 어느 자리가 다른지 찾게 해 주세요.","수직선에 두 수를 표시하고 사이에 있는 수를 어림하게 해 주세요."],
     reading:["짧은 글을 골라 아이가 소리 내어 읽는 것을 끝까지 들어 주세요.","멈춘 낱말을 표시하고 문맥으로 뜻을 짐작하게 해 주세요."],
+    writing:["짧은 문장을 받아쓰기하고 모범 문장과 비교하게 해 주세요.","하루에 한 가지 오류(띄어쓰기 또는 맞춤법)만 집중해 고쳐 주세요."],
+    emotion:["아이가 확실히 아는 쉬운 문제로 시작해 성공 경험을 만들어 주세요.",'"오늘 기분 몇 점?"으로 시작해 상태를 보고 진도를 조절해 주세요.'],
     mentoring:["좋아하는 것·요즘 재미있는 일을 묻고 끝까지 들어 주세요.","함께 지킬 약속 2~3개를 아이와 같이 정해 보세요."],
-  }[topic];
+    parent:["관찰한 행동을 '평가'가 아니라 '사실'로 전하는 연습을 해 주세요.","가정에서 할 수 있는 부담 없는 활동 하나를 정해 안내해 주세요."],
+    resource:["기초학력 진단 결과를 확인하고 부족 영역을 하나 골라 주세요.","그 영역에 맞는 다온 주제를 골라 수업안을 만들어 보세요."],
+  }[topic] || ["주제 자료를 함께 보고 핵심을 말하게 해 주세요.","아이가 설명한 것을 그대로 따라 말하며 확인해 주세요."];
   return {
     title:`${meta.title}, 함께 설명하는 ${minutes}분`, topic, grade, minutes, goal,
     objectives:[`${meta.title}의 핵심을 구체물·말로 설명할 수 있어요.`,`연습문제의 답을 구하고 풀이·검산 방법을 말할 수 있어요.`],
@@ -439,12 +594,12 @@ function makePlan(grade, topic, minutes, goal){
 
 /* ═══════════════════ 5. 무료·저렴 AI 제공자 ═══════════════════ */
 const PROVIDERS = {
-  gemini:    { name:"Google Gemini", tag:"무료 티어", type:"gemini", model:"gemini-2.5-flash-lite",
-               free:"무료 · 분당 ~15회 · 하루 ~1,000회", help:"aistudio.google.com → 'API 키 가져오기' (구글 계정, 카드 불필요)", link:"https://aistudio.google.com/apikey" },
+  gemini:    { name:"Google Gemini", tag:"무료 티어", type:"gemini", model:"gemini-2.5-flash-lite", vision:true,
+               free:"무료 · 분당 ~15회 · 하루 ~1,000회 · 사진 가능", help:"aistudio.google.com → 'API 키 가져오기' (구글 계정, 카드 불필요)", link:"https://aistudio.google.com/apikey" },
   groq:      { name:"Groq", tag:"무료", type:"openai", base:"https://api.groq.com/openai/v1", model:"llama-3.3-70b-versatile",
                free:"무료 · 분당 30회 · 하루 ~1,000회 · 아주 빠름", help:"console.groq.com → API Keys (구글 로그인 가능)", link:"https://console.groq.com/keys" },
-  github:    { name:"GitHub Models", tag:"무료", type:"openai", base:"https://models.github.ai/inference", model:"openai/gpt-4o-mini",
-               free:"무료 · GitHub 계정만 있으면 됨", help:"github.com/settings/tokens → 토큰 생성 (models:read 권한)", link:"https://github.com/settings/tokens" },
+  github:    { name:"GitHub Models", tag:"무료", type:"openai", base:"https://models.github.ai/inference", model:"openai/gpt-4o-mini", vision:true,
+               free:"무료 · GitHub 계정만 있으면 됨 · 사진 가능", help:"github.com/settings/tokens → 토큰 생성 (models:read 권한)", link:"https://github.com/settings/tokens" },
   openrouter:{ name:"OpenRouter", tag:"무료 모델", type:"openai", base:"https://openrouter.ai/api/v1", model:"meta-llama/llama-3.3-70b-instruct:free",
                free:"무료(:free 모델) · 하루 ~50회", help:"openrouter.ai → Keys (구글 로그인)", link:"https://openrouter.ai/keys" },
   mistral:   { name:"Mistral AI", tag:"실험 무료", type:"openai", base:"https://api.mistral.ai/v1", model:"mistral-small-latest",
@@ -460,23 +615,33 @@ const store = {
 };
 function cfg(){ const s = store.get(); return { provider:s.provider || null, key:s.key || "", model:s.model || "", useAI: !!s.useAI }; }
 
-async function callAI(prompt, context){
-  const c = cfg(); if (!c.provider) throw new Error("연결된 AI가 없어요");
-  const p = PROVIDERS[c.provider];
-  const sys = `당신은 초등 기초학력 지도를 돕는 성인 멘토용 수업 조수 '다온'입니다.
+const MENTOR_SYS = `당신은 초등 기초학력 지도를 돕는 성인 멘토용 수업 조수 '다온'입니다.
 규칙:
 1. 아래 [근거 자료]에 있는 내용을 바탕으로 답하고, 자료에 없는 사실은 "제가 가진 자료에는 없어요"라고 솔직히 말하세요. 자료 ID를 꾸며내지 마세요.
 2. 답변 끝에 실제로 사용한 자료의 ID만 (출처: ID) 형식으로 짧게 표시하세요.
 3. 계산 문제는 스스로 정확히 계산하세요. 추정하지 마세요.
 4. 한국어로, 멘토가 바로 활용할 수 있게 짧고 따뜻하게 답하세요.
-5. 학생 개인정보를 묻거나 저장하려 하지 마세요.
-
-[근거 자료]
-${context || "(관련 자료 없음 — 이 경우 자료에 없다고 답하고 일반적인 수업 조언만 짧게 하세요)"}`;
+5. 학생 개인정보를 묻거나 저장하려 하지 마세요. 진단·의료적 판단을 단정하지 마세요.`;
+const STUDENT_SYS = `당신은 초등학생과 대화하는 친절한 수업 도우미 '다온'입니다. 지금 대화 상대는 어른이 아니라 학생입니다.
+규칙:
+1. 절대 정답을 직접 말하지 마세요. 힌트와 질문으로 한 단계씩 이끌어 주세요 (소크라틱 방식).
+2. 한 번에 한 가지만 물어보세요. 짧고 따뜻하게, 쉬운 한국어로 답하세요.
+3. 학생이 맞으면 구체적으로 칭찬하고, 틀리면 어디서 막혔는지 질문으로 찾아 주세요. 얼른 정답을 알려주지 마세요.
+4. [근거 자료]에 없는 내용은 "그건 제가 잘 모르는 부분이에요"라고 솔직히 말하세요.
+5. 학생이 힘들거나 무서운 이야기, 위험한 이야기를 하면 "그건 꼭 어른에게 말해 줘요. 선생님이나 보호자에게 지금 알려 주세요"라고 안내하고 다른 답은 하지 마세요.
+6. 학생의 개인정보(이름, 주소, 연락처)를 묻지 마세요.`;
+async function callAI(prompt, context, opts = {}){
+  const c = cfg(); if (!c.provider) throw new Error("연결된 AI가 없어요");
+  const p = PROVIDERS[c.provider];
+  const sys = (studentMode() || opts.socratic ? STUDENT_SYS : MENTOR_SYS) + `\n\n[근거 자료]\n${context || "(관련 자료 없음 — 이 경우 자료에 없다고 답하고 일반적인 수업 조언만 짧게 하세요)"}`;
+  const img = opts.imageDataUrl || null;
+  if (img && !p.vision) throw new Error(`${p.name}의 이 모델은 사진을 읽지 못해요 (vision 미지원). Gemini나 GitHub Models로 바꿔 보세요.`);
   if (p.type === "gemini"){
+    const parts = [{ text:prompt }];
+    if (img){ const m = img.match(/^data:(.*?);base64,(.*)$/); parts.push({ inline_data:{ mime_type:m?.[1] || "image/jpeg", data:m?.[2] || "" } }); }
     const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${c.model}:generateContent`, {
       method:"POST", headers:{ "x-goog-api-key": c.key, "Content-Type":"application/json" },
-      body: JSON.stringify({ systemInstruction:{ parts:[{ text:sys }] }, contents:[{ role:"user", parts:[{ text:prompt }] }], generationConfig:{ maxOutputTokens:800, temperature:0.3 } }),
+      body: JSON.stringify({ systemInstruction:{ parts:[{ text:sys }] }, contents:[{ role:"user", parts }], generationConfig:{ maxOutputTokens:800, temperature:0.3 } }),
     });
     if (!r.ok) throw new Error(`Gemini 오류 ${r.status}: ` + (await r.text()).slice(0,200));
     const j = await r.json();
@@ -484,7 +649,8 @@ ${context || "(관련 자료 없음 — 이 경우 자료에 없다고 답하고
   }
   const headers = { "Content-Type":"application/json" };
   if (c.key) headers["Authorization"] = `Bearer ${c.key}`;
-  const body = { model:c.model, messages:[{ role:"system", content:sys }, { role:"user", content:prompt }], max_tokens:800, temperature:0.3 };
+  const userContent = img ? [{ type:"text", text:prompt }, { type:"image_url", image_url:{ url:img } }] : prompt;
+  const body = { model:c.model, messages:[{ role:"system", content:sys }, { role:"user", content:userContent }], max_tokens:800, temperature:0.3 };
   if (c.provider === "ollama") body.think = false; // qwen3 등 로컬 모델의 사고 토큰 낭비·빈 응답 방지
   const r = await fetch(`${p.base}/chat/completions`, {
     method:"POST", headers,
@@ -497,13 +663,46 @@ ${context || "(관련 자료 없음 — 이 경우 자료에 없다고 답하고
   return text || "빈 응답이 왔어요";
 }
 
+/* ══ AI 답변 자동 점검 (없는 출처 인용 · 주의 표현 · 계산 검산) ══ */
+function autoCheck(text){
+  const issues = [];
+  const ids = [...new Set([...text.matchAll(/DEMO-[A-Z]+-\d+/g)].map(m => m[0]))];
+  const badIds = ids.filter(id => !ALL_CHUNKS.some(c => c.chunk_id === id));
+  if (badIds.length) issues.push(`자료에 없는 출처 ID 인용: ${badIds.join(", ")}`);
+  const BADPH = ["확실한 진단","진단입니다","진단이에요","ADHD","난독증","자폐","치료가 필요","약물을","병원에 가","지능이"];
+  const hit = BADPH.filter(w => text.includes(w));
+  if (hit.length) issues.push(`주의 표현: ${hit.join(", ")} — 진단·의료 판단은 멘토 영역이 아니에요`);
+  const calcRe = /(\d[\d,]*)\s*([+\-×*÷/])\s*(\d[\d,]*)\s*[=은는]\s*([\d,]+(?:\.\d+)?|\d+\/\d+)/g;
+  let m; const badCalc = [];
+  while ((m = calcRe.exec(text))){
+    try {
+      const real = parseExact(`${m[1].replace(/,/g,"")}${m[2]}${m[3].replace(/,/g,"")}`);
+      const claimed = parseExact(m[4].replace(/,/g,""));
+      if (real.toStr() !== claimed.toStr()) badCalc.push(`${m[1]}${m[2]}${m[3]}=${m[4]} → 실제 ${real.toStr()}`);
+    } catch { /* 식으로 안 읽히면 건너뜀 */ }
+  }
+  const qrRe = /(\d+)\s*[÷/]\s*(\d+)[^\n]{0,40}?몫\s*([\d,]+)[^\n]{0,20}?나머지\s*([\d,]+)/g;
+  while ((m = qrRe.exec(text))){
+    const a = BigInt(m[1]), b = BigInt(m[2]), q = BigInt(m[3].replace(/,/g,"")), r = BigInt(m[4].replace(/,/g,""));
+    if (b === 0n || b*q + r !== a || r < 0n || r >= b) badCalc.push(`${a}÷${b}: 몫 ${q}, 나머지 ${r} → 검산 불일치`);
+  }
+  if (badCalc.length) issues.push(`계산 검산 불일치: ${badCalc.join(" · ")}`);
+  return issues;
+}
+function checkHtml(issues){
+  if (!issues.length) return `<div class="checkline"><b>자동 점검</b> 출처·표현·계산 이상 없음 — 그래도 내용은 멘토가 확인하세요</div>`;
+  return `<div class="checkline warn"><b>자동 점검 ⚠</b> ${issues.map(esc).join("<br>")}</div>`;
+}
+
 /* ═══════════════════ 6. 응답 규칙 (자료 없음·부정 의도·되묻기) ═══════════════════ */
 const PRIVATE_RE = [/[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}/, /(?<!\d)01[016789][-\s]?\d{3,4}[-\s]?\d{4}(?!\d)/, /(?<!\d)\d{6}[-\s]?[1-4]\d{6}(?!\d)/, /(?:학생\s*이름|성명|이름)\s*[:：=]\s*[가-힣A-Za-z]{2,}/];
 const NORESOURCE = [/교과서.*(쪽|페이지|정답)/, /(\d+\s*쪽|\d+\s*페이지)/, /(동영상|영상|유튜브|링크|주소).*(보여|알려|찾아|줘|링크)/, /(와이파이|wifi|비밀번호|비번)/, /(시험|기출|족보|정답지)/, /(날씨|주식|코인|뉴스)/];
 const NEG = /(말고|빼고|제외하고?|아니고|대신에?|없이)/;
+const SAFETY_RE = /(자해|죽고\s*싶|목숨|죽여|죽인|살인|폭행|때리|맞았|성추행|성폭|학대|흉기|칼로|약물|마약|왕따|괴롭|따돌|무서워서|두려워|자살)/;
 function classify(text){
   const t = text.trim();
   for (const re of PRIVATE_RE) if (re.test(t)) return { kind:"private" };
+  if (SAFETY_RE.test(t)) return { kind:"safety" };
   // 계산식 추출: 숫자+연산자 패턴이 있으면 계산 의도
   const exprs = t.match(/[\d(][\d\s.+\-*/×÷()]*[)\d=](?:\s*은|는|=|얼마|계산|풀어)?/g);
   const valid = (exprs || []).map(e => e.replace(/[은는]|얼마|계산|풀어|=| 줘|주세요/g,"").trim())
@@ -547,6 +746,7 @@ const $ = id => document.getElementById(id);
 document.querySelectorAll(".tab").forEach(b => b.addEventListener("click", () => {
   document.querySelectorAll(".tab").forEach(x => x.classList.toggle("on", x === b));
   document.querySelectorAll(".tabpanel").forEach(p => p.hidden = p.id !== "tab-" + b.dataset.tab);
+  if (b.dataset.tab === "journal") drawJournal();
 }));
 const esc = s => s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 function mdLite(s){
@@ -572,7 +772,7 @@ document.addEventListener("click", e => {
   const c = ALL_CHUNKS.find(x => x.chunk_id === b.dataset.src); if (!c) return;
   addMsg("bot", `<b>${esc(c.heading)}</b> · ${c.chunk_id}<br><span class="small">${esc(c.docTitle)}</span><br><br>${esc(c.text)}`);
 });
-const SUGGEST = ["3/4 + 1/8 계산해 줘", "85 ÷ 4는 몫과 나머지가 뭐야?", "4학년 나눗셈 수업안 만들어 줘", "분모와 분자를 어떻게 설명하면 좋을까?", "첫 만남에서 뭘 하면 좋아?", "학생 읽기 지도 방법 알려 줘"];
+const SUGGEST = ["3/4 + 1/8 계산해 줘", "85 ÷ 4는 몫과 나머지가 뭐야?", "4학년 나눗셈 수업안 만들어 줘", "분모와 분자를 어떻게 설명하면 좋을까?", "띄어쓰기 지도 방법 알려 줘", "학생 자신감이 없을 때 어떻게 해?", "기초학력 진단 자료는 어디서 찾아?"];
 function drawChips(){
   $("chips").innerHTML = SUGGEST.map(s => `<button class="chip" type="button">${s}</button>`).join("");
   $("chips").querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => { $("ask").value = c.textContent; $("composer").requestSubmit(); }));
@@ -582,6 +782,7 @@ let busy = false;
 async function answer(text){
   const cls = classify(text);
   const useAI = cfg().useAI && cfg().provider;
+  if (cls.kind === "safety") return { html:"그 이야기는 정말 중요해 보여요. 챗봇보다 <b>꼭 어른에게 말해 주세요</b> — 담임 선생님, 보호자, 또는 곁에 있는 멘토에게 지금 알려 주세요. 힘들거나 무서운 일은 혼자 들고 있지 않아도 돼요 💛", srcs:null, safety:true };
   if (cls.kind === "private") return { html:"이름·연락처·학교처럼 개인을 식별할 수 있는 내용은 입력하지 말아 주세요. 개인정보 없이 수업 목표나 개념만 알려 주시면 도와드릴게요.", srcs:null };
   if (cls.kind === "noresource") return { html:mdLite(noResourceReply().text + "\n\n" + noResourceReply().hint), srcs:null };
   if (cls.kind === "unclear") return { html:"조금 더 구체적으로 물어봐 주세요. 예: '분수 설명 방법', '4학년 곱셈 문제', '26÷7 계산' 처럼요.", srcs:null };
@@ -589,16 +790,21 @@ async function answer(text){
   if (cls.kind === "plan"){
     const topic = cls.topic || "fractions", grade = cls.grade || 3, minutes = cls.minutes || 40;
     const plan = makePlan(grade, topic, minutes, "");
+    actLog("plan", `${TOPICS.find(t=>t.id===topic)?.title} ${grade}학년 ${minutes}분`);
+    LAST_QUIZ = { topic, grade, items:plan.quiz };
     let h = `<b>${esc(plan.title)}</b> (${grade}학년)<br>`;
     h += plan.steps.map(s => `<b>${s.phase}</b> ${s.min}분 — ${esc(s.name)}`).join("<br>");
-    h += `<div class="quiz"><b>확인 문제</b>${plan.quiz.map(q => `<br>· ${esc(q.q)}<details class="ans"><summary>정답 보기</summary><div><b>${esc(q.a)}</b> — ${esc(q.ex)}</div></details>`).join("")}</div>`;
+    h += `<div class="quiz"><b>확인 문제</b><br>${quizHtml(plan.quiz)}</div>`;
     h += `<div class="small" style="margin-top:6px">자세한 수업안은 📝 수업안 만들기 탭에서 내려받을 수 있어요.</div>`;
     return { html:h, srcs:plan.sources.map(c => ({ c })) };
   }
   if (cls.kind === "quiz"){
     const quiz = makeQuiz(cls.topic, cls.grade);
     const meta = TOPICS.find(t => t.id === cls.topic);
-    let h = `<b>${meta.title} · ${cls.grade}학년 연습문제</b><div class="quiz">${quiz.map(q => `· ${esc(q.q)}<details class="ans"><summary>정답 보기</summary><div><b>${esc(q.a)}</b> — ${esc(q.ex)}</div></details>`).join("<br>")}</div>`;
+    actLog("quiz", `${meta.title} ${cls.grade}학년`);
+    LAST_QUIZ = { topic:cls.topic, grade:cls.grade, items:quiz };
+    let h = `<b>${meta.title} · ${cls.grade}학년 연습문제</b><div class="quiz">${quizHtml(quiz)}</div>`;
+    if (!studentMode() && activeProf()) h += `<div class="small" style="margin-top:4px">✓/✗ 버튼을 누르면 '${esc(activeProf())}' 학생의 기록에 남습니다.</div>`;
     return { html:h, srcs:search("", cls.topic, 3).map(s => ({ c:s.c })) };
   }
   // search
@@ -608,7 +814,8 @@ async function answer(text){
       const ctx = rows.slice(0,3).map(r => `[${r.c.chunk_id}] ${r.c.heading}: ${r.c.text}`).join("\n\n");
       const aiText = await callAI(text, ctx);
       HISTORY.push({ q:text, a:aiText.slice(0,500) });
-      return { html:mdLite(aiText) + `<div class="tagline">${PROVIDERS[cfg().provider].name} · 근거 자료 ${rows.length}건 참고 · 미검증 초안입니다</div>`, srcs:rows.slice(0,3), ai:true };
+      actLog("ai", PROVIDERS[cfg().provider].name);
+      return { html:mdLite(aiText) + checkHtml(autoCheck(aiText)) + `<div class="tagline">${PROVIDERS[cfg().provider].name} · 근거 자료 ${rows.length}건 참고 · 미검증 초안입니다</div>`, srcs:rows.slice(0,3), ai:true };
     } catch (e){
       return { html:mdLite(`AI 연결에 실패해서 로컬 답변으로 대신할게요.\n(${e.message.slice(0,120)})`) + localSearchHtml(rows), srcs:rows, err:true };
     }
@@ -626,21 +833,137 @@ function localSearchHtml(rows){
 }
 $("composer").addEventListener("submit", async e => {
   e.preventDefault();
-  const q = $("ask").value.trim(); if (!q || busy) return;
-  $("ask").value = ""; busy = true; $("sendBtn").disabled = true;
-  addMsg("user", esc(q));
+  const q = $("ask").value.trim(); if ((!q && !pendingImg) || busy) return;
+  const img = pendingImg; $("ask").value = ""; pendingImg = null; $("imgFile").value = ""; $("imgPrev").classList.remove("on");
+  busy = true; $("sendBtn").disabled = true;
+  addMsg("user", (img ? `[📷 ${esc(img.name)}] ` : "") + esc(q || "(사진만 첨부)"));
   const th = document.createElement("div"); th.className = "thinking"; th.textContent = "생각 중"; $("chatlog").appendChild(th);
   $("chatlog").scrollTop = $("chatlog").scrollHeight;
   try {
-    const r = await answer(q);
-    th.remove();
-    const d = addMsg("bot", r.html + srcChips(r.srcs), r.ai ? "ai" : "");
-    if (r.err) d.style.borderColor = "var(--rose-line)";
+    if (img){
+      const c = cfg();
+      if (!(c.useAI && c.provider)){ th.remove(); addMsg("bot", "사진은 AI 연결이 필요해요. 🔑 무료 AI 연결 탭에서 Gemini나 GitHub Models(둘 다 무료·사진 가능)을 연결하면 문제 사진을 읽어 드려요."); }
+      else {
+        try {
+          const prompt = (q || "이 사진을 보고 설명해 주세요") + "\n\n[사진 속 문제/내용을 먼저 읽고, " + (studentMode() ? "힌트와 질문으로 이끌어 주세요" : "초등 수준에 맞게 풀이·지도법을 답해 주세요") + "]";
+          const out = await callAI(prompt, "", { imageDataUrl: img.dataUrl });
+          actLog("ai", `사진 분석 · ${PROVIDERS[c.provider].name}`);
+          th.remove();
+          addMsg("bot", mdLite(out) + checkHtml(autoCheck(out)) + `<div class="tagline">${esc(PROVIDERS[c.provider].name)} · 사진 분석 · 미검증 초안입니다</div>`, "ai");
+        } catch (err2){ th.remove(); addMsg("bot", mdLite(`사진 분석 실패: ${err2.message.slice(0,160)}`)); }
+      }
+    } else {
+      const r = await answer(q);
+      th.remove();
+      const d = addMsg("bot", r.html + srcChips(r.srcs), r.ai ? "ai" : "");
+      if (r.err) d.style.borderColor = "var(--rose-line)";
+    }
   } catch (err){
     th.remove(); addMsg("bot", "문제가 생겼어요: " + esc(String(err).slice(0,150)));
   }
   busy = false; $("sendBtn").disabled = false;
 });
+
+/* ══ 학생 모드 · 가명 프로필 · 활동 로그 ══ */
+function studentMode(){ return !!store.get().studentMode; }
+function refreshWho(){
+  const stu = studentMode();
+  document.querySelectorAll("#whoSeg button").forEach(b => b.classList.toggle("on", (b.dataset.who === "student") === stu));
+  $("stubanner").classList.toggle("on", stu);
+  $("profWrap").style.display = stu ? "none" : "";
+}
+document.querySelectorAll("#whoSeg button").forEach(b => b.addEventListener("click", () => {
+  const s = store.get(); s.studentMode = b.dataset.who === "student"; store.set(s); refreshWho();
+  if (s.studentMode) document.querySelectorAll(".markrow").forEach(r => r.remove());
+  addMsg("bot", s.studentMode ? "🧒 <b>학생 모드</b>로 바꿨어요. 이제 답 대신 힌트로 이끌고, 대화·기록은 저장하지 않아요." : "🧑‍🏫 <b>멘토 모드</b>로 돌아왔어요. 정답·해설과 기록 기능을 다시 씁니다.");
+}));
+
+const profStore = {
+  get(){ try { return JSON.parse(localStorage.getItem("daon_students") || "[]"); } catch { return []; } },
+  set(v){ localStorage.setItem("daon_students", JSON.stringify(v)); },
+};
+function activeProf(){ return store.get().activeProf || ""; }
+function drawProfiles(){
+  const ps = profStore.get();
+  $("profSel").innerHTML = `<option value="">선택 안 함</option>` + ps.map(p => `<option value="${esc(p.alias)}" ${p.alias === activeProf() ? "selected" : ""}>${esc(p.alias)}</option>`).join("");
+}
+$("profSel").addEventListener("change", () => { const s = store.get(); s.activeProf = $("profSel").value; store.set(s); });
+$("profAdd").addEventListener("click", () => {
+  const a = prompt("학생 별칭을 입력하세요 (실명 금지 — 예: 오리1, 파랑A):");
+  if (!a || !a.trim()) return;
+  const alias = a.trim().slice(0, 12);
+  const ps = profStore.get();
+  if (ps.some(p => p.alias === alias)){ alert("이미 있는 별칭이에요."); return; }
+  ps.push({ alias, misses: [] }); profStore.set(ps);
+  const s = store.get(); s.activeProf = alias; store.set(s);
+  drawProfiles(); addMsg("bot", `학생 프로필 '<b>${esc(alias)}</b>'을 만들었어요. 이제 문제의 ✓/✗ 버튼으로 맞힘·틀림을 기록할 수 있어요. 이 기기에만 저장되고 실명은 절대 쓰지 마세요.`);
+});
+$("profMiss").addEventListener("click", () => {
+  const al = activeProf();
+  if (!al){ addMsg("bot", "먼저 위에서 학생 별칭을 고르거나 '+ 별칭 추가'로 만들어 주세요. 실명은 쓰지 말아 주세요."); return; }
+  const p = profStore.get().find(x => x.alias === al);
+  const ms = p?.misses || [];
+  if (!ms.length){ addMsg("bot", `<b>${esc(al)}</b> 학생의 오답 기록이 아직 없어요. 문제를 풀고 ✗ 버튼을 누르면 여기에 모입니다.`); return; }
+  const byTopic = {};
+  ms.forEach(m => { byTopic[m.topic] = (byTopic[m.topic] || 0) + 1; });
+  const worst = Object.entries(byTopic).sort((a,b) => b[1] - a[1])[0];
+  let h = `<b>${esc(al)}</b> 학생 오답 ${ms.length}건<br>`;
+  h += ms.slice(-8).reverse().map(m => `· ${esc(TOPICS.find(t => t.id === m.topic)?.title || m.topic)} — ${esc(m.q.slice(0, 40))}${m.q.length > 40 ? "…" : ""} <span class="small">${new Date(m.when).toLocaleDateString("ko-KR")}</span>`).join("<br>");
+  if (worst) h += `<br><br><b>다음 수업 제안</b> — '${esc(TOPICS.find(t => t.id === worst[0])?.title || worst[0])}'에서 ${worst[1]}번 틀렸어요. 한 단계 쉬운 문제부터 다시 시작해 보세요.`;
+  addMsg("bot", h);
+});
+
+const logStore = {
+  get(){ try { return JSON.parse(localStorage.getItem("daon_log") || "[]"); } catch { return []; } },
+  set(v){ localStorage.setItem("daon_log", JSON.stringify(v)); },
+};
+function actLog(kind, label){ if (studentMode()) return; const l = logStore.get(); l.push({ t: Date.now(), kind, label }); logStore.set(l.slice(-300)); }
+
+/* ══ 문제 렌더 (힌트·오답 버튼 포함) ══ */
+let LAST_QUIZ = null;
+function quizHtml(quiz){
+  const stu = studentMode(), prof = activeProf();
+  return quiz.map((q, i) => {
+    let h = `${i > 0 ? "<br>" : ""}· ${esc(q.q)}`;
+    if (stu && q.hints?.length) h += q.hints.map((x, j) => `<details class="hint"><summary>💡 힌트 ${j + 1}</summary><div>${esc(x)}</div></details>`).join("");
+    h += `<details class="ans"><summary>${stu ? "정답 확인 (스스로 푼 뒤)" : "정답 보기"}</summary><div><b>${esc(q.a)}</b> — ${esc(q.ex)}</div></details>`;
+    if (!stu && prof) h += `<span class="markrow"><button type="button" class="right" data-mi="${i}">✓ 맞음</button><button type="button" class="wrong" data-mi="${i}">✗ 틀림</button></span>`;
+    return h;
+  }).join("");
+}
+document.addEventListener("click", e => {
+  const b = e.target.closest(".markrow button"); if (!b || !LAST_QUIZ || studentMode()) return;
+  const q = LAST_QUIZ.items[Number(b.dataset.mi)]; if (!q) return;
+  const row = b.parentElement;
+  if (row.dataset.done) return; row.dataset.done = "1";
+  const wrong = b.classList.contains("wrong");
+  b.classList.add(wrong ? "doneW" : "done");
+  b.textContent = wrong ? "✗ 기록됨" : "✓ 기록됨";
+  row.querySelectorAll("button").forEach(x => { if (x !== b) x.disabled = true; });
+  if (wrong){
+    const al = activeProf();
+    const ps = profStore.get(); const p = ps.find(x => x.alias === al); if (!p) return;
+    p.misses.push({ topic: LAST_QUIZ.topic, grade: LAST_QUIZ.grade, q: q.q, a: q.a, when: Date.now() });
+    profStore.set(ps);
+    actLog("miss", `${al} · ${TOPICS.find(t => t.id === LAST_QUIZ.topic)?.title}`);
+  }
+});
+
+/* ══ 사진 첨부 ══ */
+let pendingImg = null;
+$("imgBtn").addEventListener("click", () => $("imgFile").click());
+$("imgFile").addEventListener("change", () => {
+  const f = $("imgFile").files[0]; if (!f) return;
+  if (f.size > 3 * 1024 * 1024){ addMsg("bot", "사진이 너무 커요 — 3MB 이하로 올려 주세요."); $("imgFile").value = ""; return; }
+  const rd = new FileReader();
+  rd.onload = () => {
+    pendingImg = { name: f.name, dataUrl: rd.result };
+    $("imgThumb").src = rd.result; $("imgName").textContent = f.name;
+    $("imgPrev").classList.add("on");
+  };
+  rd.readAsDataURL(f);
+});
+$("imgDel").addEventListener("click", () => { pendingImg = null; $("imgFile").value = ""; $("imgPrev").classList.remove("on"); });
 
 /* ── 수업안 탭 ── */
 TOPICS.forEach(t => { const o = document.createElement("option"); o.value = t.id; o.textContent = `${t.title} — ${t.desc}`; $("pTopic").appendChild(o); });
@@ -648,7 +971,7 @@ function planHtml(p){
   let h = `<h3>${esc(p.title)}</h3><p class="small">${p.grade}학년 · ${p.minutes}분${p.goal ? " · 목표: " + esc(p.goal) : ""}</p>`;
   h += `<p style="margin:8px 0;font-size:14px"><b>목표</b> — ${p.objectives.map(esc).join("<br>")}</p>`;
   h += p.steps.map(s => `<div class="phase"><b>${s.phase}</b><span class="min">${s.min}분</span> ${esc(s.name)}<ul>${s.list.filter(Boolean).map(i => `<li>${esc(i)}</li>`).join("")}</ul></div>`).join("");
-  h += `<div class="quiz"><b>연습문제 3개</b>${p.quiz.map(q => `<br><br>· ${esc(q.q)}<details class="ans"><summary>정답·해설 보기</summary><div><b>${esc(q.a)}</b><br>${esc(q.ex)}</div></details>`).join("")}</div>`;
+  h += `<div class="quiz"><b>연습문제 3개</b><br>${quizHtml(p.quiz)}</div>`;
   h += `<div class="small" style="margin-top:10px">출처 자료: ${p.sources.map(c => c.chunk_id).join(" · ")}</div>`;
   h += `<div style="margin-top:12px;font-size:14px"><b>수업 전 체크</b><ul style="margin:4px 0;padding-left:20px">${p.checklist.map(c => `<li>${esc(c)}</li>`).join("")}</ul></div>`;
   h += `<div class="warnbox">${p.warnings.map(esc).join("<br>")}</div>`;
@@ -665,7 +988,8 @@ $("planBtn").addEventListener("click", () => {
   const goal = $("pGoal").value.trim();
   if (PRIVATE_RE.some(re => re.test(goal))){ $("planOut").innerHTML = `<div class="warnbox">목표에 개인정보처럼 보이는 내용이 있어요. 개인을 식별할 수 없는 일반 목표만 써 주세요.</div>`; return; }
   const p = makePlan(Number($("pGrade").value), $("pTopic").value, Number($("pMin").value), goal);
-  LAST_PLAN = p;
+  LAST_PLAN = p; LAST_QUIZ = { topic: p.topic, grade: p.grade, items: p.quiz };
+  actLog("plan", `${TOPICS.find(t=>t.id===p.topic)?.title} ${p.grade}학년 ${p.minutes}분`);
   const c = cfg();
   $("planOut").innerHTML = planHtml(p) + `<div class="toolrow">
     <button id="copyPlan" type="button">📋 전체 복사</button>
@@ -734,8 +1058,73 @@ $("modeToggle").addEventListener("click", () => {
   addMsg("bot", s.useAI ? `AI 모드를 켰어요. 이제 ${esc(PROVIDERS[s.provider].name)}가 자료를 참고해 답합니다.` : "로컬 모드로 돌아왔어요.");
 });
 
+/* ── 수준 맞춤 탭 ── */
+const EASY_WORDS = [["받아올림","10개를 다음 자리로 넘기는 것"],["받아내림","윗자리에서 10을 빌려 오는 것"],["통분","분모를 똑같이 맞추는 것"],["자리값","자리마다 다른 크기"],["유창성","막힘없이 자연스럽게 읽는 것"],["문맥","앞뒤 말의 흐름"],["억양","목소리의 오르내림"],["분모","아래 수(몇 부분으로 나눴는지)"],["분자","위 수(몇 부분 골랐는지)"],["몫","나눈 결과"],["나머지","남은 수"],["성취기준","배워야 할 목표"],["진단","어디가 어려운지 살펴보는 것"],["보정","부족한 부분 다시 채우기"],["누가기록","지금까지 한 것을 차곡차곡 적은 것"]];
+function easyText(t){
+  let s = " " + t.trim() + " ";
+  for (const [a, b] of EASY_WORDS) s = s.replaceAll(a, `${b}`);
+  s = s.trim().replace(/([.!?])\s+/g, "$1\n").replace(/\s*(그리고|그래서|하지만|그런데|때문에|그러면|그러니까|이렇게 하면)\s*/g, "\n$1 ");
+  s = s.split("\n").map(x => x.trim()).filter(Boolean).map(x => x.length > 60 ? x.replace(/,\s*/g, ".\n") : x).join("\n");
+  return s;
+}
+function levelCards(easy, mid, hard){
+  return `<div class="lvlcard easy"><h4>🌱 쉬운 말</h4>${esc(easy).replace(/\n/g, "<br>")}</div>`
+       + `<div class="lvlcard"><h4>🙂 보통</h4>${esc(mid).replace(/\n/g, "<br>")}</div>`
+       + `<div class="lvlcard hard"><h4>🔥 도전</h4>${esc(hard).replace(/\n/g, "<br>")}</div>`;
+}
+$("lvlBtn").addEventListener("click", async () => {
+  const t = $("lvlIn").value.trim();
+  if (!t){ $("lvlOut").innerHTML = `<div class="warnbox">바꿀 문장을 먼저 넣어 주세요.</div>`; return; }
+  if (PRIVATE_RE.some(re => re.test(t))){ $("lvlOut").innerHTML = `<div class="warnbox">개인정보처럼 보이는 내용이 있어요. 이름·연락처는 빼고 넣어 주세요.</div>`; return; }
+  const c = cfg();
+  if (c.useAI && c.provider){
+    $("lvlBtn").disabled = true; $("lvlBtn").textContent = "AI가 바꾸는 중…";
+    try {
+      const out = await callAI(`아래 문장을 세 수준으로 바꿔 주세요. 반드시 [쉬운말] [보통] [도전] 표시를 그대로 써서 세 부분으로 나누어 주세요.\n- 쉬운말: 초등 저학년도 이해하는 짧고 쉬운 문장\n- 보통: 원문 의미 그대로\n- 도전: 같은 내용을 한 단계 어렵게 + 스스로 생각할 질문 1개 추가\n\n[문장]\n${t}`, "");
+      const pick = tag => { const m = out.match(new RegExp(`\\[${tag}\\]([\\s\\S]*?)(?=\\[|$)`)); return m ? m[1].trim() : ""; };
+      const ez = pick("쉬운말"), md = pick("보통"), hd = pick("도전");
+      if (ez || hd){ $("lvlOut").innerHTML = levelCards(ez || easyText(t), md || t, hd || (t + "\n\n🔎 도전 질문: 왜 그런지 설명해 보세요.")) + `<div class="small" style="margin-top:8px">✨ ${esc(PROVIDERS[c.provider].name)} 변환 — 미검증 초안입니다</div>`; }
+      else $("lvlOut").innerHTML = levelCards(easyText(t), t, t + "\n\n🔎 도전 질문: 왜 그런지 설명해 보세요.") + `<div class="small" style="margin-top:8px">AI 표시를 못 읽어 규칙 변환으로 대신했어요</div>`;
+      actLog("level", PROVIDERS[c.provider].name);
+    } catch (e2){ $("lvlOut").innerHTML = levelCards(easyText(t), t, t + "\n\n🔎 도전 질문: 왜 그런지 설명해 보세요.") + `<div class="warnbox">AI 변환 실패(${esc(e2.message.slice(0,80))}) — 규칙 변환으로 대신했어요</div>`; }
+    $("lvlBtn").disabled = false; $("lvlBtn").textContent = "세 수준으로 바꾸기";
+    return;
+  }
+  $("lvlOut").innerHTML = levelCards(easyText(t), t, t + "\n\n🔎 도전 질문: 왜 그런지 자기 말로 설명해 보세요.\n이 내용을 다른 친구에게 설명한다면 어떻게 말할까요?");
+});
+
+/* ── 활동일지 탭 ── */
+const KIND_NAME = { plan:"수업안 생성", quiz:"연습문제 생성", ai:"AI 상담", miss:"오답 기록", level:"수준 변환" };
+function todayLog(){ const d = new Date(); const key = d.toDateString(); return logStore.get().filter(x => new Date(x.t).toDateString() === key); }
+function drawJournal(){
+  const l = todayLog();
+  $("jList").innerHTML = l.length
+    ? l.map(x => `<div class="jitem"><span class="jt">${new Date(x.t).toLocaleTimeString("ko-KR", { hour:"2-digit", minute:"2-digit" })}</span><span class="jk">${KIND_NAME[x.kind] || x.kind}</span><span>${esc(x.label)}</span></div>`).join("")
+    : `<p class="small">오늘 기록이 아직 없어요. 수업안·연습문제를 만들거나 AI 상담을 하면 여기에 자동으로 모입니다.</p>`;
+}
+$("jMake").addEventListener("click", () => {
+  const l = todayLog();
+  const d = new Date();
+  const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")} (${["일","월","화","수","목","금","토"][d.getDay()]})`;
+  let txt = `[다온 멘토 활동일지 — 자동 초안]\n날짜: ${dateStr}\n\n■ 오늘 한 일\n`;
+  txt += l.length ? l.map(x => `  · ${new Date(x.t).toLocaleTimeString("ko-KR", { hour:"2-digit", minute:"2-digit" })} ${KIND_NAME[x.kind] || x.kind}: ${x.label}`).join("\n") : "  · (기록 없음)";
+  const misses = l.filter(x => x.kind === "miss");
+  if (misses.length){ txt += `\n\n■ 오답 참고\n${misses.map(x => `  · ${x.label}`).join("\n")}\n  → 다음 수업에서 해당 주제를 한 단계 쉽게 복습하는 것을 제안합니다.`; }
+  txt += `\n\n■ 메모\n  (멘토가 직접 추가)`;
+  txt += `\n\n⚠ 이 문서는 자동 초안입니다 — 담당 교사·센터의 양식과 절차에 맞게 수정해 사용하세요. 학생 실명·개인정보는 넣지 마세요.`;
+  $("jOut").innerHTML = `<div class="jout">${esc(txt)}</div><div class="toolrow"><button id="jCopy" type="button">📋 복사</button><button id="jDl" type="button">⬇ 텍스트로 내려받기</button></div>`;
+  $("jCopy").onclick = async () => { await navigator.clipboard.writeText(txt); $("jCopy").textContent = "복사했어요 ✓"; };
+  $("jDl").onclick = () => { const b = new Blob([txt], { type:"text/plain;charset=utf-8" }); const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = `멘토활동일지_${dateStr.split(" ")[0]}.txt`; a.click(); URL.revokeObjectURL(a.href); };
+});
+$("jClear").addEventListener("click", () => {
+  if (!confirm("오늘 기록을 지울까요? 지우면 되돌릴 수 없어요.")) return;
+  const key = new Date().toDateString();
+  logStore.set(logStore.get().filter(x => new Date(x.t).toDateString() !== key));
+  $("jOut").innerHTML = ""; drawJournal();
+});
+
 /* ── 시작 ── */
-drawChips(); drawProviders(); refreshMode();
+drawChips(); drawProviders(); refreshMode(); refreshWho(); drawProfiles(); drawJournal();
 addMsg("bot", `안녕하세요, 멘토님! 저는 <b>다온</b>이에요 🦆<br><br>지금은 <b>로컬 모드</b>라 계산·수업안·자료 검색을 정확하게 도와드려요. 🔑 무료 AI 연결 탭에서 키를 넣으면 더 자연스러운 대화가 가능해요.<br><br>아래 버튼을 눌러 바로 시작해 보세요!`);
 </script>
 </body>
