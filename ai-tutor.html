@@ -1189,7 +1189,7 @@ $("modeToggle").addEventListener("click", () => {
   const s = store.get();
   if (!s.provider){ document.querySelector('[data-tab="connect"]').click(); return; }
   s.useAI = !s.useAI; store.set(s); refreshMode();
-  addMsg("bot", s.useAI ? `AI 모드를 켰어요. 이제 ${esc(PROVIDERS[s.provider].name)}가 자료를 참고해 답합니다.` : "로컬 모드로 돌아왔어요.");
+  addMsg("bot", s.useAI ? `AI 모드를 켰어요. 이제 ${esc(PROVIDERS[s.provider].name)}(으)로 자료를 참고해 답합니다.` : "로컬 모드로 돌아왔어요.");
 });
 
 /* ── 수준 맞춤 탭 ── */
@@ -1259,6 +1259,7 @@ $("jClear").addEventListener("click", () => {
 
 /* ── 시작 ── */
 $("localModel").innerHTML = LOCAL_MODELS.map(m => `<option value="${m.id}">${m.label}</option>`).join("");
+{ const s = store.get(); if (!s.browserModel && LOCAL_MODELS.some(m => m.id === s.model)){ s.browserModel = s.model; store.set(s); } }
 drawChips(); drawProviders(); refreshMode(); refreshWho(); drawProfiles(); drawJournal();
 addMsg("bot", `안녕하세요, 멘토님! 저는 <b>다온</b>이에요 🦆<br><br>지금은 <b>로컬 모드</b>라 계산·수업안·자료 검색을 정확하게 도와드려요. 🔑 무료 AI 연결 탭에서 키를 넣으면 더 자연스러운 대화가 가능해요.<br><br>아래 버튼을 눌러 바로 시작해 보세요!`);
 </script>
