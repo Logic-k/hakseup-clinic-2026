@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>다온 AI 튜터 — 무료로 쓰는 멘토 수업 도우미</title>
 <meta name="description" content="학습멘토를 위한 무료 AI 챗봇. 수업안·연습문제·정답 검산·자료 검색은 키 없이 바로 작동하고, 무료 AI API를 연결하면 대화형 답변까지 가능합니다.">
+<meta name="robots" content="noindex,nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@300;400;700&family=Gowun+Dodum&display=swap" rel="stylesheet">
@@ -156,6 +157,29 @@ details.hint div{padding:4px 0 0 2px; color:var(--ink2)}
 </style>
 </head>
 <body>
+<div id="gate" style="position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--paper);border:1.5px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:30px 26px;max-width:340px;width:100%;text-align:center">
+    <div style="font-size:34px">🔒</div>
+    <h2 style="font-size:22px;margin:6px 0 4px">시범 운영 중</h2>
+    <p style="font-size:13.5px;color:var(--ink2);margin:0 0 14px">담당자 전용입니다. 안내받은 접속 코드를 입력해 주세요.</p>
+    <input id="gateIn" type="password" placeholder="접속 코드" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-size:15px;font-family:inherit;text-align:center;box-sizing:border-box" autocomplete="off">
+    <button id="gateBtn" style="margin-top:10px;width:100%;background:var(--mint);color:#fff;border:0;border-radius:10px;padding:11px;font-size:15px;font-weight:700;cursor:pointer">들어가기</button>
+    <p id="gateErr" style="font-size:12.5px;color:var(--rose);margin:8px 0 0;min-height:1em"></p>
+  </div>
+</div>
+<script>
+(() => {
+  const CODE = "다온2026"; /* 담당자 접속 코드 — 바꾸고 싶으면 이 한 줄만 수정 */
+  const gate = document.getElementById("gate");
+  if (localStorage.getItem("daon_gate") === "ok"){ gate.remove(); return; }
+  const tryIn = () => {
+    if (document.getElementById("gateIn").value.trim() === CODE){ localStorage.setItem("daon_gate","ok"); gate.remove(); }
+    else document.getElementById("gateErr").textContent = "코드가 달라요 — 다시 확인해 주세요";
+  };
+  document.getElementById("gateBtn").onclick = tryIn;
+  document.getElementById("gateIn").addEventListener("keydown", e => { if (e.key === "Enter") tryIn(); });
+})();
+</script>
 <div class="wrap">
 
   <header class="hero">
