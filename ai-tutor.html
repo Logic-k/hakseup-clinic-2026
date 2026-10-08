@@ -631,6 +631,18 @@ const kv = (key, empty) => ({
 const store = kv("daon_ai", {});
 function cfg(){ const s = store.get(); return { provider:s.provider || null, key:s.key || "", model:s.model || "", useAI: !!s.useAI }; }
 const provName = () => PROVIDERS[cfg().provider]?.name || "";
+function errHint(e){
+  const m = String(e && e.message || e);
+  if (/failed to fetch|networkerror|load failed/i.test(m)){
+    const pv = cfg().provider;
+    if (pv === "ollama") return " — Ollama가 꺼져 있거나 설치가 안 된 것 같아요. PC에서 Ollama를 실행하거나, 🔑 연결 탭에서 '연결 테스트'로 확인해 보세요";
+    if (pv === "browser") return " — 모델을 불러오지 못했어요. 🔑 연결 탭에서 '모델 준비하기'를 눌러 상태를 확인해 보세요";
+    return " — 네트워크에 닿지 않아요. 인터넷 연결과 🔑 연결 탭 '연결 테스트'를 확인해 보세요";
+  }
+  if (/401|403|unauthorized|invalid.*key|api.key/i.test(m)) return " — API 키가 맞지 않아요. 🔑 연결 탭에서 키를 다시 저장해 보세요";
+  if (/429|rate.?limit|quota|한도/i.test(m)) return " — 무료 한도를 넘었어요. 잠시 후 다시 하거나 다른 무료 제공자로 바꿔 보세요";
+  return "";
+}
 
 const MENTOR_SYS = `당신은 초등 기초학력 지도를 돕는 성인 멘토용 수업 조수 '다온'입니다.
 규칙:
@@ -684,7 +696,7 @@ async function callAI(prompt, context, opts = {}){
 /* ── 브라우저 내장 LLM (transformers.js · 설치·키 불필요 · 외부 전송 없음) ── */
 const LOCAL_MODELS = [
   { id:"onnx-community/Qwen2.5-1.5B-Instruct", label:"권장 · Qwen 1.5B (~1GB · 한국어 무난)" },
-  { id:"onnx-community/Qwen3-0.6B-ONNX",       label:"빠름 · Qwen 0.6B (~450MB · 더 얕은 답변)" },
+  { id:"onnx-community/Qwen2.5-0.5B-Instruct", label:"빠름 · Qwen 0.5B (~450MB · 더 얕은 답변)" },
 ];
 let _tjs = null, _gen = null, _genKey = "";
 function setLocalStatus(msg, pct){
@@ -694,17 +706,23 @@ function setLocalStatus(msg, pct){
 }
 /* 추론은 웹 워커에서 돌려 화면이 멈추지 않게 한다 (워커를 못 만들면 본스레드로 폴백) */
 const LOCAL_WORKER_SRC = `
-import { pipeline, env, TextStreamer } from "https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1";
+import { pipeline, env, TextStreamer } from "https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.1";
 env.allowLocalModels = false;
 let gen = null, genKey = "", chain = Promise.resolve();
 async function handle(d){
-  const { id, action, model, dtype, messages, opts } = d;
+  const { id, action, model, messages, opts } = d;
   try {
-    const want = model + "|" + dtype;
-    if (!gen || genKey !== want){
+    if (!gen || genKey !== model){
       self.postMessage({ id, type:"status", text:"AI 엔진·모델을 준비하는 중…" });
-      gen = await pipeline("text-generation", model, { dtype, progress_callback: p => self.postMessage({ id, type:"progress", p }) });
-      genKey = want;
+      const pcb = p => self.postMessage({ id, type:"progress", p });
+      let err1 = null;
+      for (const dev of (d.devs || ["wasm"])){
+        try {
+          gen = await pipeline("text-generation", model, dev === "webgpu" ? { dtype:"q4f16", device:"webgpu", progress_callback:pcb } : { dtype:"q4", progress_callback:pcb });
+          genKey = model; err1 = null; break;
+        } catch(e){ err1 = e; gen = null; self.postMessage({ id, type:"status", text:"GPU가 안 잡혀서 CPU 방식으로 준비 중…" }); }
+      }
+      if (!gen) throw err1 || new Error("모델을 불러오지 못했어요");
     }
     self.postMessage({ id, type:"ready" });
     if (action === "load"){ self.postMessage({ id, type:"done", text:"" }); return; }
@@ -716,7 +734,15 @@ async function handle(d){
 }
 self.onmessage = e => { chain = chain.then(() => handle(e.data)); };
 `;
-let _lw = null, _lwFail = false, _lwId = 0;
+let _lw = null, _lwFail = false, _lwId = 0, _lwReady = false;
+let _gpuDevs = null;
+async function gpuDevs(){
+  if (_gpuDevs) return _gpuDevs;
+  let ok = false;
+  try { ok = !!navigator.gpu && !!(await navigator.gpu.requestAdapter()); } catch {}
+  _gpuDevs = ok ? ["webgpu", "wasm"] : ["wasm"];
+  return _gpuDevs;
+}
 function localWorker(){
   if (!_lw) _lw = new Worker(URL.createObjectURL(new Blob([LOCAL_WORKER_SRC], { type:"text/javascript" })), { type:"module" });
   return _lw;
@@ -741,32 +767,47 @@ function localRun(payload){
         if (th) th.textContent = "다온이 쓰는 중… " + shown.slice(-120);
         else setLocalStatus("답을 만드는 중… " + shown.slice(-60), 100);
       }
-      else if (m.type === "done"){ w.removeEventListener("message", onMsg); setLocalStatus("모델 준비됨 — 이 브라우저에서 바로 답해요", 100); resolve(m.text); }
-      else if (m.type === "error"){ w.removeEventListener("message", onMsg); reject(new Error(m.message)); }
+      else if (m.type === "done"){ settle(resolve)(m.text); _lwReady = true; setLocalStatus("모델 준비됨 — 이 브라우저에서 바로 답해요", 100); }
+      else if (m.type === "error"){ settle(reject)(new Error(m.message)); }
+    };
+    const settle = fn => v => {
+      w.removeEventListener("message", onMsg);
+      w.removeEventListener("error", onErr);
+      w.removeEventListener("messageerror", onErr);
+      fn(v);
+    };
+    const onErr = e => {
+      _lwFail = true; _lw = null; try { w.terminate(); } catch {}
+      settle(reject)(new Error("백그라운드 실행기를 못 켰어요 — 본문 표시로 바꿔 다시 시도할게요"));
     };
     w.addEventListener("message", onMsg);
+    w.addEventListener("error", onErr);
+    w.addEventListener("messageerror", onErr);
     w.postMessage({ id, ...payload });
   });
 }
-const localDtype = () => (navigator.gpu ? "q4f16" : "q4");
 async function localPipe(model){
-  if (!_lwFail){ try { await localRun({ action:"load", model, dtype:localDtype() }); return; } catch(e){ _lwFail = true; } }
+  if (!_lwFail){ try { await localRun({ action:"load", model, devs: await gpuDevs() }); return; } catch(e){ _lwFail = true; } }
   setLocalStatus("AI 엔진을 불러오는 중…", null);
-  if (!_tjs){ _tjs = await import("https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1"); _tjs.env.allowLocalModels = false; }
-  const want = model + "|" + localDtype();
-  if (_gen && _genKey === want) return _gen;
+  if (!_tjs){ _tjs = await import("https://cdn.jsdelivr.net/npm/@huggingface/transformers@4.3.1"); _tjs.env.allowLocalModels = false; }
+  if (_gen && _genKey === model) return _gen;
   _gen = null; _genKey = "";
   const files = {};
-  _gen = await _tjs.pipeline("text-generation", model, { dtype:localDtype(),
-    progress_callback(p){ if (p.status === "progress" && p.total){ files[p.file] = p.loaded / p.total; const pct = Math.round(Object.values(files).reduce((a,b) => a + b, 0) / Math.max(1, Object.keys(files).length) * 100); setLocalStatus(`모델 받는 중… ${pct}% (처음 한 번만)`, pct); } } });
-  _genKey = want;
+  const pcb = p => { if (p.status === "progress" && p.total){ files[p.file] = p.loaded / p.total; const pct = Math.round(Object.values(files).reduce((a,b) => a + b, 0) / Math.max(1, Object.keys(files).length) * 100); setLocalStatus(`모델 받는 중… ${pct}% (처음 한 번만)`, pct); } };
+  let err1 = null;
+  for (const dev of (await gpuDevs())){
+    try { _gen = await _tjs.pipeline("text-generation", model, dev === "webgpu" ? { dtype:"q4f16", device:"webgpu", progress_callback:pcb } : { dtype:"q4", progress_callback:pcb }); _genKey = model; break; }
+    catch(e){ err1 = e; _gen = null; setLocalStatus("GPU가 안 잡혀서 CPU 방식으로 준비 중…", null); }
+  }
+  if (!_gen) throw err1 || new Error("모델을 불러오지 못했어요");
+  _lwReady = true;
   setLocalStatus("모델 준비 완료", 100);
   return _gen;
 }
 async function callLocal(sys, prompt, model){
   if (!_lwFail){
     try {
-      const txt = await localRun({ action:"gen", model, dtype:localDtype(),
+      const txt = await localRun({ action:"gen", model, devs: await gpuDevs(),
         messages:[{ role:"system", content:sys }, { role:"user", content:prompt }],
         opts:{ max_new_tokens:420, do_sample:true, temperature:0.6, top_p:0.95, repetition_penalty:1.05 } });
       return txt.replace(/<think>[\s\S]*?<\/think>/g, "").trim() || "빈 응답이 왔어요";
@@ -937,11 +978,12 @@ async function answer(text){
   if (useAI){
     try {
       const ctx = rows.slice(0,3).map(r => `[${r.c.chunk_id}] ${r.c.heading}: ${r.c.text}`).join("\n\n");
+      const pn = provName();
       const aiText = await callAI(text, ctx);
-      actLog("ai", provName());
-      return { html:mdLite(aiText) + checkHtml(autoCheck(aiText)) + `<div class="tagline">${provName()} · 근거 자료 ${rows.length}건 참고 · 미검증 초안입니다</div>`, srcs:rows.slice(0,3), ai:true };
+      actLog("ai", pn);
+      return { html:mdLite(aiText) + checkHtml(autoCheck(aiText)) + `<div class="tagline">${pn} · 근거 자료 ${rows.length}건 참고 · 미검증 초안입니다</div>`, srcs:rows.slice(0,3), ai:true };
     } catch (e){
-      return { html:mdLite(`AI 연결에 실패해서 로컬 답변으로 대신할게요.\n(${e.message.slice(0,120)})`) + localSearchHtml(rows), srcs:rows, err:true };
+      return { html:mdLite(`AI 연결에 실패해서 로컬 답변으로 대신할게요.\n(${e.message.slice(0,120)}${esc(errHint(e))})`) + localSearchHtml(rows), srcs:rows, err:true };
     }
   }
   if (!rows.length) return { html:mdLite("자료에서 관련 내용을 못 찾았어요. 없다고 꾸며내지 않고 그냥 알려드려요 🙈\n\n찾을 수 있는 범위: " + TOPICS.map(t => t.title).join(" · ")), srcs:null };
@@ -970,10 +1012,11 @@ $("composer").addEventListener("submit", async e => {
       else {
         try {
           const prompt = (q || "이 사진을 보고 설명해 주세요") + "\n\n[사진 속 문제/내용을 먼저 읽고, " + (studentMode() ? "힌트와 질문으로 이끌어 주세요" : "초등 수준에 맞게 풀이·지도법을 답해 주세요") + "]";
+          const pn = PROVIDERS[c.provider].name;
           const out = await callAI(prompt, "", { imageDataUrl: img.dataUrl });
-          actLog("ai", `사진 분석 · ${provName()}`);
+          actLog("ai", `사진 분석 · ${pn}`);
           th.remove();
-          addMsg("bot", mdLite(out) + checkHtml(autoCheck(out)) + `<div class="tagline">${esc(provName())} · 사진 분석 · 미검증 초안입니다</div>`, "ai");
+          addMsg("bot", mdLite(out) + checkHtml(autoCheck(out)) + `<div class="tagline">${esc(pn)} · 사진 분석 · 미검증 초안입니다</div>`, "ai");
         } catch (err2){ th.remove(); addMsg("bot", mdLite(`사진 분석 실패: ${err2.message.slice(0,160)}`)); }
       }
     } else {
@@ -1161,7 +1204,7 @@ $("localLoad").addEventListener("click", async () => {
   const s = store.get(); s.provider = "browser"; s.model = $("localModel").value; s.browserModel = s.model; store.set(s);
   $("localLoad").disabled = true;
   try { await localPipe(s.model); connStatus("✓ 모델 준비 완료 — 위 모드 바에서 'AI 답변 켜기'를 누르면 바로 씁니다.", true); }
-  catch(e){ connStatus("모델 준비 실패: " + e.message.slice(0,140) + " — 네트워크를 확인하거나 더 작은 모델로 바꿔 보세요.", false); }
+  catch(e){ connStatus("모델 준비 실패: " + e.message.slice(0,140) + (errHint(e) || " — 네트워크를 확인하거나 더 작은 모델로 바꿔 보세요."), false); }
   $("localLoad").disabled = false;
 });
 $("keySave").addEventListener("click", () => {
@@ -1212,15 +1255,21 @@ $("lvlBtn").addEventListener("click", async () => {
   if (hasPrivate(t)){ $("lvlOut").innerHTML = `<div class="warnbox">개인정보처럼 보이는 내용이 있어요. 이름·연락처는 빼고 넣어 주세요.</div>`; return; }
   const c = cfg();
   if (c.useAI && c.provider){
+    if (PROVIDERS[c.provider].type === "browser" && !_lwReady && !_gen){
+      $("lvlOut").innerHTML = `<div class="warnbox">먼저 🔑 무료 AI 연결 탭에서 '⬇ 모델 준비하기'를 눌러 주세요 — 첫 준비는 몇 분 걸려서, 여기서 바로 시작하면 멈춘 것처럼 보여요.</div>`;
+      return;
+    }
+    const pn = PROVIDERS[c.provider].name;
     $("lvlBtn").disabled = true; $("lvlBtn").textContent = "AI가 바꾸는 중…";
     try {
       const out = await callAI(`아래 문장을 세 수준으로 바꿔 주세요. 반드시 [쉬운말] [보통] [도전] 표시를 그대로 써서 세 부분으로 나누어 주세요.\n- 쉬운말: 초등 저학년도 이해하는 짧고 쉬운 문장\n- 보통: 원문 의미 그대로\n- 도전: 같은 내용을 한 단계 어렵게 + 스스로 생각할 질문 1개 추가\n\n[문장]\n${t}`, "");
       const pick = tag => { const m = out.match(new RegExp(`\\[${tag}\\]([\\s\\S]*?)(?=\\[|$)`)); return m ? m[1].trim() : ""; };
       const ez = pick("쉬운말"), md = pick("보통"), hd = pick("도전");
-      if (ez || hd){ $("lvlOut").innerHTML = levelCards(ez || easyText(t), md || t, hd || (t + "\n\n🔎 도전 질문: 왜 그런지 설명해 보세요.")) + `<div class="small" style="margin-top:8px">✨ ${esc(provName())} 변환 — 미검증 초안입니다</div>`; }
+      if (ez || hd){ $("lvlOut").innerHTML = levelCards(ez || easyText(t), md || t, hd || (t + "\n\n🔎 도전 질문: 왜 그런지 설명해 보세요.")) + `<div class="small" style="margin-top:8px">✨ ${esc(pn)} 변환 — 미검증 초안입니다</div>`; }
+      else if (out.trim()){ $("lvlOut").innerHTML = levelCards(easyText(t), out.trim(), t + "\n\n🔎 도전 질문: 왜 그런지 설명해 보세요.") + `<div class="small" style="margin-top:8px">✨ ${esc(pn)}가 표시 형식을 안 맞춰서 그대로 옮겼어요 — 미검증 초안</div>`; }
       else $("lvlOut").innerHTML = levelCards(easyText(t), t, t + "\n\n🔎 도전 질문: 왜 그런지 설명해 보세요.") + `<div class="small" style="margin-top:8px">AI 표시를 못 읽어 규칙 변환으로 대신했어요</div>`;
-      actLog("level", provName());
-    } catch (e2){ $("lvlOut").innerHTML = levelCards(easyText(t), t, t + "\n\n🔎 도전 질문: 왜 그런지 설명해 보세요.") + `<div class="warnbox">AI 변환 실패(${esc(e2.message.slice(0,80))}) — 규칙 변환으로 대신했어요</div>`; }
+      actLog("level", pn);
+    } catch (e2){ $("lvlOut").innerHTML = levelCards(easyText(t), t, t + "\n\n🔎 도전 질문: 왜 그런지 설명해 보세요.") + `<div class="warnbox">AI 변환 실패(${esc(e2.message.slice(0,80))}${esc(errHint(e2))}) — 규칙 변환으로 대신했어요</div>`; }
     $("lvlBtn").disabled = false; $("lvlBtn").textContent = "세 수준으로 바꾸기";
     return;
   }
@@ -1259,7 +1308,7 @@ $("jClear").addEventListener("click", () => {
 
 /* ── 시작 ── */
 $("localModel").innerHTML = LOCAL_MODELS.map(m => `<option value="${m.id}">${m.label}</option>`).join("");
-{ const s = store.get(); if (!s.browserModel && LOCAL_MODELS.some(m => m.id === s.model)){ s.browserModel = s.model; store.set(s); } }
+{ const s = store.get(); if (!LOCAL_MODELS.some(m => m.id === s.browserModel)) s.browserModel = LOCAL_MODELS[0].id; if (s.provider === "browser" && !LOCAL_MODELS.some(m => m.id === s.model)) s.model = s.browserModel; store.set(s); }
 drawChips(); drawProviders(); refreshMode(); refreshWho(); drawProfiles(); drawJournal();
 addMsg("bot", `안녕하세요, 멘토님! 저는 <b>다온</b>이에요 🦆<br><br>지금은 <b>로컬 모드</b>라 계산·수업안·자료 검색을 정확하게 도와드려요. 🔑 무료 AI 연결 탭에서 키를 넣으면 더 자연스러운 대화가 가능해요.<br><br>아래 버튼을 눌러 바로 시작해 보세요!`);
 </script>
