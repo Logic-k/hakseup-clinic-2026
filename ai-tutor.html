@@ -364,6 +364,7 @@ function divParts(a, b){ // 양의 정수 몫·나머지
 /* ═══════════════════ 2. 자료(코퍼스) — 직접 작성 시연 자료 ═══════════════════ */
 const AUTHOR = "다온 튜터 제작 · 직접 작성 예시";
 const DISCLAIMER = "직접 작성한 시연 자료입니다. 교육부·교육청 공식 교육과정이나 검정 교과서가 아닙니다.";
+const topicMeta = id => TOPICS.find(t => t.id === id);
 const TOPICS = [
   { id:"number", title:"수의 크기·자리값", desc:"받아보기·자리값·수 비교", area:"수학 · 수와 연산" },
   { id:"fractions", title:"분수의 의미", desc:"같게 나눈 부분과 전체의 관계", area:"수학 · 수와 연산" },
@@ -569,7 +570,7 @@ function makeQuiz(topic, grade){
     item(3, `수업 중 알게 된 학생의 연락처를 내 휴대폰에 저장해도 되나요?`, `아니요`, `개인정보는 정해진 양식·절차로만 다룹니다.`, [`개인정보 수칙을 떠올려 보세요`])];
 }
 function makePlan(grade, topic, minutes, goal){
-  const meta = TOPICS.find(t => t.id === topic);
+  const meta = topicMeta(topic);
   const srcs = search("", topic, 3);
   const bySec = Object.fromEntries(srcs.map(s => [s.c.section, s.c]));
   const mm = {20:[3,6,8,3], 40:[5,12,18,5], 60:[8,18,26,8]}[minutes];
@@ -623,11 +624,13 @@ const PROVIDERS = {
   ollama:    { name:"Ollama (내 컴퓨터)", tag:"완전 무료", type:"openai", base:"http://127.0.0.1:11434/v1", model:"exaone3.5:2.4b",
                free:"완전 무료 · 내 PC에서 실행 · 외부 전송 없음", help:"ollama.com 설치 → 터미널에서 `ollama run exaone3.5:2.4b` (키 불필요)", link:"https://ollama.com", nokey:true },
 };
-const store = {
-  get(){ try { return JSON.parse(localStorage.getItem("daon_ai") || "{}"); } catch { return {}; } },
-  set(v){ localStorage.setItem("daon_ai", JSON.stringify(v)); },
-};
+const kv = (key, empty) => ({
+  get(){ try { const v = JSON.parse(localStorage.getItem(key)); return v == null ? empty : v; } catch { return empty; } },
+  set(v){ localStorage.setItem(key, JSON.stringify(v)); },
+});
+const store = kv("daon_ai", {});
 function cfg(){ const s = store.get(); return { provider:s.provider || null, key:s.key || "", model:s.model || "", useAI: !!s.useAI }; }
+const provName = () => PROVIDERS[cfg().provider]?.name || "";
 
 const MENTOR_SYS = `당신은 초등 기초학력 지도를 돕는 성인 멘토용 수업 조수 '다온'입니다.
 규칙:
@@ -814,9 +817,12 @@ const PRIVATE_RE = [/[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}/, /(?<!\d)01[016789][-\s]?\d
 const NORESOURCE = [/교과서.*(쪽|페이지|정답)/, /(\d+\s*쪽|\d+\s*페이지)/, /(동영상|영상|유튜브|링크|주소).*(보여|알려|찾아|줘|링크)/, /(와이파이|wifi|비밀번호|비번)/, /(시험|기출|족보|정답지)/, /(날씨|주식|코인|뉴스)/];
 const NEG = /(말고|빼고|제외하고?|아니고|대신에?|없이)/;
 const SAFETY_RE = /(자해|죽고\s*싶|목숨|죽여|죽인|살인|폭행|때리|맞았|성추행|성폭|학대|흉기|칼로|약물|마약|왕따|괴롭|따돌|무서워서|두려워|자살)/;
+const hasPrivate = t => PRIVATE_RE.some(re => re.test(t));
+const parseGrade = t => Number(GRADE_NO.exec(t)?.[1]) || null;
+const parseMin = t => Number(MIN_NO.exec(t)?.[1]) || null;
 function classify(text){
   const t = text.trim();
-  for (const re of PRIVATE_RE) if (re.test(t)) return { kind:"private" };
+  if (hasPrivate(t)) return { kind:"private" };
   if (SAFETY_RE.test(t)) return { kind:"safety" };
   // 계산식 추출: 숫자+연산자 패턴이 있으면 계산 의도
   const exprs = t.match(/[\d(][\d\s.+\-*/×÷()]*[)\d=](?:\s*은|는|=|얼마|계산|풀어)?/g);
@@ -824,8 +830,8 @@ function classify(text){
                    .filter(e => /\d/.test(e) && /[+\-*/×÷]/.test(e));
   if (valid.length) return { kind:"math", exprs:valid };
   const { topic, excluded } = detectTopic(t);
-  if (/(수업안|수업 계획|수업계획|수업 준비|수업준비|레슨)/.test(t)) return { kind:"plan", topic, grade:Number(GRADE_NO.exec(t)?.[1]) || null, minutes:Number(MIN_NO.exec(t)?.[1]) || null, excluded };
-  if (/(연습문제|문제|퀴즈|문항|내줘|내 줘|만들어)/.test(t) && topic) return { kind:"quiz", topic, grade:Number(GRADE_NO.exec(t)?.[1]) || 3, excluded };
+  if (/(수업안|수업 계획|수업계획|수업 준비|수업준비|레슨)/.test(t)) return { kind:"plan", topic, grade:parseGrade(t), minutes:parseMin(t), excluded };
+  if (/(연습문제|문제|퀴즈|문항|내줘|내 줘|만들어)/.test(t) && topic) return { kind:"quiz", topic, grade:parseGrade(t) || 3, excluded };
   for (const re of NORESOURCE) if (re.test(t) && !NEG.test(t)) return { kind:"noresource" };
   if (t.replace(/[^가-힣a-z0-9]/g,"").length < 4) return { kind:"unclear" };
   return { kind:"search", topic, excluded, t };
@@ -870,6 +876,11 @@ function mdLite(s){
   h = h.replace(/\(출처:\s*([^)]+)\)/g, "<br>출처: $1");
   return h;
 }
+function downloadText(name, text){
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([text], { type:"text/plain;charset=utf-8" }));
+  a.download = name; a.click(); URL.revokeObjectURL(a.href);
+}
 function srcChips(rows){
   if (!rows?.length) return "";
   return `<div class="srcs">${rows.map(r => { const c = r.c || r; return `<button class="src" data-src="${c.chunk_id}" title="${esc(c.docTitle)}">${c.chunk_id}</button>`; }).join("")}</div>`;
@@ -892,20 +903,19 @@ function drawChips(){
   $("chips").innerHTML = SUGGEST.map(s => `<button class="chip" type="button">${s}</button>`).join("");
   $("chips").querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => { $("ask").value = c.textContent; $("composer").requestSubmit(); }));
 }
-let HISTORY = [];
 let busy = false;
 async function answer(text){
   const cls = classify(text);
   const useAI = cfg().useAI && cfg().provider;
   if (cls.kind === "safety") return { html:"그 이야기는 정말 중요해 보여요. 챗봇보다 <b>꼭 어른에게 말해 주세요</b> — 담임 선생님, 보호자, 또는 곁에 있는 멘토에게 지금 알려 주세요. 힘들거나 무서운 일은 혼자 들고 있지 않아도 돼요 💛", srcs:null, safety:true };
   if (cls.kind === "private") return { html:"이름·연락처·학교처럼 개인을 식별할 수 있는 내용은 입력하지 말아 주세요. 개인정보 없이 수업 목표나 개념만 알려 주시면 도와드릴게요.", srcs:null };
-  if (cls.kind === "noresource") return { html:mdLite(noResourceReply().text + "\n\n" + noResourceReply().hint), srcs:null };
+  if (cls.kind === "noresource"){ const r = noResourceReply(); return { html:mdLite(r.text + "\n\n" + r.hint), srcs:null }; }
   if (cls.kind === "unclear") return { html:"조금 더 구체적으로 물어봐 주세요. 예: '분수 설명 방법', '4학년 곱셈 문제', '26÷7 계산' 처럼요.", srcs:null };
   if (cls.kind === "math"){ const r = mathReply(cls.exprs); return { html:mdLite(r.text), srcs:null }; }
   if (cls.kind === "plan"){
     const topic = cls.topic || "fractions", grade = cls.grade || 3, minutes = cls.minutes || 40;
     const plan = makePlan(grade, topic, minutes, "");
-    actLog("plan", `${TOPICS.find(t=>t.id===topic)?.title} ${grade}학년 ${minutes}분`);
+    actLog("plan", `${topicMeta(topic)?.title} ${grade}학년 ${minutes}분`);
     LAST_QUIZ = { topic, grade, items:plan.quiz };
     let h = `<b>${esc(plan.title)}</b> (${grade}학년)<br>`;
     h += plan.steps.map(s => `<b>${s.phase}</b> ${s.min}분 — ${esc(s.name)}`).join("<br>");
@@ -915,7 +925,7 @@ async function answer(text){
   }
   if (cls.kind === "quiz"){
     const quiz = makeQuiz(cls.topic, cls.grade);
-    const meta = TOPICS.find(t => t.id === cls.topic);
+    const meta = topicMeta(cls.topic);
     actLog("quiz", `${meta.title} ${cls.grade}학년`);
     LAST_QUIZ = { topic:cls.topic, grade:cls.grade, items:quiz };
     let h = `<b>${meta.title} · ${cls.grade}학년 연습문제</b><div class="quiz">${quizHtml(quiz)}</div>`;
@@ -928,9 +938,8 @@ async function answer(text){
     try {
       const ctx = rows.slice(0,3).map(r => `[${r.c.chunk_id}] ${r.c.heading}: ${r.c.text}`).join("\n\n");
       const aiText = await callAI(text, ctx);
-      HISTORY.push({ q:text, a:aiText.slice(0,500) });
-      actLog("ai", PROVIDERS[cfg().provider].name);
-      return { html:mdLite(aiText) + checkHtml(autoCheck(aiText)) + `<div class="tagline">${PROVIDERS[cfg().provider].name} · 근거 자료 ${rows.length}건 참고 · 미검증 초안입니다</div>`, srcs:rows.slice(0,3), ai:true };
+      actLog("ai", provName());
+      return { html:mdLite(aiText) + checkHtml(autoCheck(aiText)) + `<div class="tagline">${provName()} · 근거 자료 ${rows.length}건 참고 · 미검증 초안입니다</div>`, srcs:rows.slice(0,3), ai:true };
     } catch (e){
       return { html:mdLite(`AI 연결에 실패해서 로컬 답변으로 대신할게요.\n(${e.message.slice(0,120)})`) + localSearchHtml(rows), srcs:rows, err:true };
     }
@@ -962,9 +971,9 @@ $("composer").addEventListener("submit", async e => {
         try {
           const prompt = (q || "이 사진을 보고 설명해 주세요") + "\n\n[사진 속 문제/내용을 먼저 읽고, " + (studentMode() ? "힌트와 질문으로 이끌어 주세요" : "초등 수준에 맞게 풀이·지도법을 답해 주세요") + "]";
           const out = await callAI(prompt, "", { imageDataUrl: img.dataUrl });
-          actLog("ai", `사진 분석 · ${PROVIDERS[c.provider].name}`);
+          actLog("ai", `사진 분석 · ${provName()}`);
           th.remove();
-          addMsg("bot", mdLite(out) + checkHtml(autoCheck(out)) + `<div class="tagline">${esc(PROVIDERS[c.provider].name)} · 사진 분석 · 미검증 초안입니다</div>`, "ai");
+          addMsg("bot", mdLite(out) + checkHtml(autoCheck(out)) + `<div class="tagline">${esc(provName())} · 사진 분석 · 미검증 초안입니다</div>`, "ai");
         } catch (err2){ th.remove(); addMsg("bot", mdLite(`사진 분석 실패: ${err2.message.slice(0,160)}`)); }
       }
     } else {
@@ -993,10 +1002,7 @@ document.querySelectorAll("#whoSeg button").forEach(b => b.addEventListener("cli
   addMsg("bot", s.studentMode ? "🧒 <b>학생 모드</b>로 바꿨어요. 이제 답 대신 힌트로 이끌고, 대화·기록은 저장하지 않아요." : "🧑‍🏫 <b>멘토 모드</b>로 돌아왔어요. 정답·해설과 기록 기능을 다시 씁니다.");
 }));
 
-const profStore = {
-  get(){ try { return JSON.parse(localStorage.getItem("daon_students") || "[]"); } catch { return []; } },
-  set(v){ localStorage.setItem("daon_students", JSON.stringify(v)); },
-};
+const profStore = kv("daon_students", []);
 function activeProf(){ return store.get().activeProf || ""; }
 function drawProfiles(){
   const ps = profStore.get();
@@ -1023,15 +1029,12 @@ $("profMiss").addEventListener("click", () => {
   ms.forEach(m => { byTopic[m.topic] = (byTopic[m.topic] || 0) + 1; });
   const worst = Object.entries(byTopic).sort((a,b) => b[1] - a[1])[0];
   let h = `<b>${esc(al)}</b> 학생 오답 ${ms.length}건<br>`;
-  h += ms.slice(-8).reverse().map(m => `· ${esc(TOPICS.find(t => t.id === m.topic)?.title || m.topic)} — ${esc(m.q.slice(0, 40))}${m.q.length > 40 ? "…" : ""} <span class="small">${new Date(m.when).toLocaleDateString("ko-KR")}</span>`).join("<br>");
-  if (worst) h += `<br><br><b>다음 수업 제안</b> — '${esc(TOPICS.find(t => t.id === worst[0])?.title || worst[0])}'에서 ${worst[1]}번 틀렸어요. 한 단계 쉬운 문제부터 다시 시작해 보세요.`;
+  h += ms.slice(-8).reverse().map(m => `· ${esc(topicMeta(m.topic)?.title || m.topic)} — ${esc(m.q.slice(0, 40))}${m.q.length > 40 ? "…" : ""} <span class="small">${new Date(m.when).toLocaleDateString("ko-KR")}</span>`).join("<br>");
+  if (worst) h += `<br><br><b>다음 수업 제안</b> — '${esc(topicMeta(worst[0])?.title || worst[0])}'에서 ${worst[1]}번 틀렸어요. 한 단계 쉬운 문제부터 다시 시작해 보세요.`;
   addMsg("bot", h);
 });
 
-const logStore = {
-  get(){ try { return JSON.parse(localStorage.getItem("daon_log") || "[]"); } catch { return []; } },
-  set(v){ localStorage.setItem("daon_log", JSON.stringify(v)); },
-};
+const logStore = kv("daon_log", []);
 function actLog(kind, label){ if (studentMode()) return; const l = logStore.get(); l.push({ t: Date.now(), kind, label }); logStore.set(l.slice(-300)); }
 
 /* ══ 문제 렌더 (힌트·오답 버튼 포함) ══ */
@@ -1060,7 +1063,7 @@ document.addEventListener("click", e => {
     const ps = profStore.get(); const p = ps.find(x => x.alias === al); if (!p) return;
     p.misses.push({ topic: LAST_QUIZ.topic, grade: LAST_QUIZ.grade, q: q.q, a: q.a, when: Date.now() });
     profStore.set(ps);
-    actLog("miss", `${al} · ${TOPICS.find(t => t.id === LAST_QUIZ.topic)?.title}`);
+    actLog("miss", `${al} · ${topicMeta(LAST_QUIZ.topic)?.title}`);
   }
 });
 
@@ -1101,10 +1104,10 @@ function planText(p){
 let LAST_PLAN = null;
 $("planBtn").addEventListener("click", () => {
   const goal = $("pGoal").value.trim();
-  if (PRIVATE_RE.some(re => re.test(goal))){ $("planOut").innerHTML = `<div class="warnbox">목표에 개인정보처럼 보이는 내용이 있어요. 개인을 식별할 수 없는 일반 목표만 써 주세요.</div>`; return; }
+  if (hasPrivate(goal)){ $("planOut").innerHTML = `<div class="warnbox">목표에 개인정보처럼 보이는 내용이 있어요. 개인을 식별할 수 없는 일반 목표만 써 주세요.</div>`; return; }
   const p = makePlan(Number($("pGrade").value), $("pTopic").value, Number($("pMin").value), goal);
   LAST_PLAN = p; LAST_QUIZ = { topic: p.topic, grade: p.grade, items: p.quiz };
-  actLog("plan", `${TOPICS.find(t=>t.id===p.topic)?.title} ${p.grade}학년 ${p.minutes}분`);
+  actLog("plan", `${topicMeta(p.topic)?.title} ${p.grade}학년 ${p.minutes}분`);
   const c = cfg();
   $("planOut").innerHTML = planHtml(p) + `<div class="toolrow">
     <button id="copyPlan" type="button">📋 전체 복사</button>
@@ -1112,10 +1115,7 @@ $("planBtn").addEventListener("click", () => {
     ${c.useAI && c.provider ? `<button id="aiTip" type="button" style="border-color:var(--lav-line);color:var(--lav)">✨ AI 지도 팁 받아보기</button>` : ""}
   </div><div id="aiTipOut"></div>`;
   $("copyPlan").onclick = async () => { await navigator.clipboard.writeText(planText(p)); $("copyPlan").textContent = "복사했어요 ✓"; };
-  $("dlPlan").onclick = () => {
-    const b = new Blob([planText(p)], { type:"text/plain;charset=utf-8" });
-    const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = `수업안_${p.topic}_${p.grade}학년.txt`; a.click(); URL.revokeObjectURL(a.href);
-  };
+  $("dlPlan").onclick = () => downloadText(`수업안_${p.topic}_${p.grade}학년.txt`, planText(p));
   const tip = $("aiTip"); if (tip) tip.onclick = async () => {
     tip.disabled = true; tip.textContent = "AI 생각 중…";
     try {
@@ -1175,21 +1175,21 @@ $("testBtn").addEventListener("click", async () => {
   connStatus("확인 중…", true);
   try {
     const out = await callAI("'연결됨'이라고만 답해 주세요.", "");
-    connStatus(`✓ 연결 성공 — ${PROVIDERS[c.provider].name}: ${out.slice(0,60)}`, true);
+    connStatus(`✓ 연결 성공 — ${provName()}: ${out.slice(0,60)}`, true);
   } catch(e){ connStatus("연결 실패: " + e.message.slice(0,160), false); }
 });
 function refreshMode(){
   const c = cfg();
   const on = c.useAI && c.provider;
   $("modebar").classList.toggle("on", !!on);
-  $("modetext").textContent = on ? `AI 모드 — ${PROVIDERS[c.provider].name} (${(c.model || "").replace("onnx-community/","")}) + 자료 검색` : "로컬 모드 — 자료 검색·템플릿·정확 계산";
+  $("modetext").textContent = on ? `AI 모드 — ${provName()} (${(c.model || "").replace("onnx-community/","")}) + 자료 검색` : "로컬 모드 — 자료 검색·템플릿·정확 계산";
   $("modeToggle").textContent = on ? "AI 답변 끄기" : (c.provider ? "AI 답변 켜기" : "AI 연결하러 가기");
 }
 $("modeToggle").addEventListener("click", () => {
   const s = store.get();
   if (!s.provider){ document.querySelector('[data-tab="connect"]').click(); return; }
   s.useAI = !s.useAI; store.set(s); refreshMode();
-  addMsg("bot", s.useAI ? `AI 모드를 켰어요. 이제 ${esc(PROVIDERS[s.provider].name)}(으)로 자료를 참고해 답합니다.` : "로컬 모드로 돌아왔어요.");
+  addMsg("bot", s.useAI ? `AI 모드를 켰어요. 이제 ${esc(provName())}(으)로 자료를 참고해 답합니다.` : "로컬 모드로 돌아왔어요.");
 });
 
 /* ── 수준 맞춤 탭 ── */
@@ -1209,7 +1209,7 @@ function levelCards(easy, mid, hard){
 $("lvlBtn").addEventListener("click", async () => {
   const t = $("lvlIn").value.trim();
   if (!t){ $("lvlOut").innerHTML = `<div class="warnbox">바꿀 문장을 먼저 넣어 주세요.</div>`; return; }
-  if (PRIVATE_RE.some(re => re.test(t))){ $("lvlOut").innerHTML = `<div class="warnbox">개인정보처럼 보이는 내용이 있어요. 이름·연락처는 빼고 넣어 주세요.</div>`; return; }
+  if (hasPrivate(t)){ $("lvlOut").innerHTML = `<div class="warnbox">개인정보처럼 보이는 내용이 있어요. 이름·연락처는 빼고 넣어 주세요.</div>`; return; }
   const c = cfg();
   if (c.useAI && c.provider){
     $("lvlBtn").disabled = true; $("lvlBtn").textContent = "AI가 바꾸는 중…";
@@ -1217,9 +1217,9 @@ $("lvlBtn").addEventListener("click", async () => {
       const out = await callAI(`아래 문장을 세 수준으로 바꿔 주세요. 반드시 [쉬운말] [보통] [도전] 표시를 그대로 써서 세 부분으로 나누어 주세요.\n- 쉬운말: 초등 저학년도 이해하는 짧고 쉬운 문장\n- 보통: 원문 의미 그대로\n- 도전: 같은 내용을 한 단계 어렵게 + 스스로 생각할 질문 1개 추가\n\n[문장]\n${t}`, "");
       const pick = tag => { const m = out.match(new RegExp(`\\[${tag}\\]([\\s\\S]*?)(?=\\[|$)`)); return m ? m[1].trim() : ""; };
       const ez = pick("쉬운말"), md = pick("보통"), hd = pick("도전");
-      if (ez || hd){ $("lvlOut").innerHTML = levelCards(ez || easyText(t), md || t, hd || (t + "\n\n🔎 도전 질문: 왜 그런지 설명해 보세요.")) + `<div class="small" style="margin-top:8px">✨ ${esc(PROVIDERS[c.provider].name)} 변환 — 미검증 초안입니다</div>`; }
+      if (ez || hd){ $("lvlOut").innerHTML = levelCards(ez || easyText(t), md || t, hd || (t + "\n\n🔎 도전 질문: 왜 그런지 설명해 보세요.")) + `<div class="small" style="margin-top:8px">✨ ${esc(provName())} 변환 — 미검증 초안입니다</div>`; }
       else $("lvlOut").innerHTML = levelCards(easyText(t), t, t + "\n\n🔎 도전 질문: 왜 그런지 설명해 보세요.") + `<div class="small" style="margin-top:8px">AI 표시를 못 읽어 규칙 변환으로 대신했어요</div>`;
-      actLog("level", PROVIDERS[c.provider].name);
+      actLog("level", provName());
     } catch (e2){ $("lvlOut").innerHTML = levelCards(easyText(t), t, t + "\n\n🔎 도전 질문: 왜 그런지 설명해 보세요.") + `<div class="warnbox">AI 변환 실패(${esc(e2.message.slice(0,80))}) — 규칙 변환으로 대신했어요</div>`; }
     $("lvlBtn").disabled = false; $("lvlBtn").textContent = "세 수준으로 바꾸기";
     return;
@@ -1248,7 +1248,7 @@ $("jMake").addEventListener("click", () => {
   txt += `\n\n⚠ 이 문서는 자동 초안입니다 — 담당 교사·센터의 양식과 절차에 맞게 수정해 사용하세요. 학생 실명·개인정보는 넣지 마세요.`;
   $("jOut").innerHTML = `<div class="jout">${esc(txt)}</div><div class="toolrow"><button id="jCopy" type="button">📋 복사</button><button id="jDl" type="button">⬇ 텍스트로 내려받기</button></div>`;
   $("jCopy").onclick = async () => { await navigator.clipboard.writeText(txt); $("jCopy").textContent = "복사했어요 ✓"; };
-  $("jDl").onclick = () => { const b = new Blob([txt], { type:"text/plain;charset=utf-8" }); const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = `멘토활동일지_${dateStr.split(" ")[0]}.txt`; a.click(); URL.revokeObjectURL(a.href); };
+  $("jDl").onclick = () => downloadText(`멘토활동일지_${dateStr.split(" ")[0]}.txt`, txt);
 });
 $("jClear").addEventListener("click", () => {
   if (!confirm("오늘 기록을 지울까요? 지우면 되돌릴 수 없어요.")) return;
